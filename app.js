@@ -1,7 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 
-// const userRouter = require("./routes/userRoutes");
+const vehicleRoutes = require("./routes/vehicleRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const cookieParser = require("cookie-parser");
@@ -22,7 +22,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
+app.use("/vehicles",vehicleRoutes);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
