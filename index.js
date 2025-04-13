@@ -13,7 +13,7 @@ process.on("uncaughtException", (err) => {
 const app = require("./app");
 const psql = db.getSequelize();
 
-psql.sync({ force: true }).then(() => {
+psql.sync({}).then(() => {
   console.log("Database & tables created!");
 });
 
