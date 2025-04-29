@@ -1,6 +1,8 @@
 const Vehicle = require("../models/vehicleModel");
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 // Get all vehicles
+const database = require("../config/database");
+const sequelize = database.getSequelize();
 exports.getAllVehicles = async (req, res) => {
   try {
     const vehicles = await Vehicle.findAll();
@@ -19,65 +21,64 @@ exports.getAllVehicles = async (req, res) => {
   }
 };
 
-
 // Get filtered vehicles with dynamic filtering
 exports.getFilteredVehicles = async (req, res) => {
   try {
     const whereClause = {};
     const modelAttributes = Vehicle.getAttributes();
     const validColumns = Object.keys(modelAttributes);
-    
+
     // Process each query parameter
-    Object.keys(req.query).forEach(key => {
+    Object.keys(req.query).forEach((key) => {
       // Skip pagination parameters
-      if (['page', 'limit', 'sort'].includes(key)) return;
-      
+      if (["page", "limit", "sort"].includes(key)) return;
+
       // Check if the parameter matches a valid column
       if (validColumns.includes(key)) {
         const value = req.query[key];
         const attributeType = modelAttributes[key].type;
         // Handle different data types
         switch (modelAttributes[key].type.constructor.name) {
-          case 'INTEGER':
+          case "INTEGER":
             // Handle range queries for numbers
-            if (value.includes(',')) {
-              const [min, max] = value.split(',').map(Number);
+            if (value.includes(",")) {
+              const [min, max] = value.split(",").map(Number);
               whereClause[key] = {
-                [Op.between]: [min, max]
+                [Op.between]: [min, max],
               };
             } else {
               whereClause[key] = parseInt(value, 10);
             }
             break;
-            
-          case 'STRING':
-          case 'TEXT':
+
+          case "STRING":
+          case "TEXT":
             // Handle multiple values for string fields
-            if (value.includes(',')) {
+            if (value.includes(",")) {
               whereClause[key] = {
-                [Op.or]: value.split(',').map(val => ({
-                  [Op.iLike]: `%${val.trim()}%`
-                }))
+                [Op.or]: value.split(",").map((val) => ({
+                  [Op.iLike]: `%${val.trim()}%`,
+                })),
               };
             } else {
               whereClause[key] = {
-                [Op.iLike]: `%${value}%`
+                [Op.iLike]: `%${value}%`,
               };
             }
             break;
-            
-          case 'DATE':
+
+          case "DATE":
             // Handle date ranges
-            if (value.includes(',')) {
-              const [start, end] = value.split(',');
+            if (value.includes(",")) {
+              const [start, end] = value.split(",");
               whereClause[key] = {
-                [Op.between]: [new Date(start), new Date(end)]
+                [Op.between]: [new Date(start), new Date(end)],
               };
             } else {
               whereClause[key] = new Date(value);
             }
             break;
-            
+
           default:
             whereClause[key] = value;
         }
@@ -90,11 +91,11 @@ exports.getFilteredVehicles = async (req, res) => {
     const offset = (page - 1) * limit;
 
     // Handle sorting
-    let order = [['createdAt', 'DESC']];
+    let order = [["createdAt", "DESC"]];
     if (req.query.sort) {
-      const [field, direction] = req.query.sort.split(',');
+      const [field, direction] = req.query.sort.split(",");
       if (validColumns.includes(field)) {
-        order = [[field, direction.toUpperCase() || 'ASC']];
+        order = [[field, direction.toUpperCase() || "ASC"]];
       }
     }
 
@@ -103,24 +104,24 @@ exports.getFilteredVehicles = async (req, res) => {
       where: whereClause,
       limit,
       offset,
-      order
+      order,
     });
 
     // Send response
     res.status(200).json({
-      status: 'success',
+      status: "success",
       results: vehicles.count,
       currentPage: page,
       totalPages: Math.ceil(vehicles.count / limit),
       filters: whereClause,
       data: {
-        vehicles: vehicles.rows
-      }
+        vehicles: vehicles.rows,
+      },
     });
   } catch (err) {
     res.status(400).json({
-      status: 'error',
-      message: err.message
+      status: "error",
+      message: err.message,
     });
   }
 };
@@ -224,6 +225,64 @@ exports.deleteVehicle = async (req, res) => {
       data: null,
     });
   } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
+
+exports.getUniqueFieldValues = async (req, res) => {
+  try {
+    const { fields } = req.query; // Expect fields as comma-separated string
+
+    if (!fields) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please specify fields to get unique values",
+      });
+    }
+
+    const fieldArray = fields.split(",");
+    const modelAttributes = Vehicle.getAttributes();
+    const validFields = fieldArray.filter((field) =>
+      Object.keys(modelAttributes).includes(field)
+    );
+
+    if (validFields.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "No valid fields provided",
+      });
+    }
+
+    const results = {};
+
+    // Get unique values for each valid field
+    await Promise.all(
+      validFields.map(async (field) => {
+        const uniqueValues = await Vehicle.findAll({
+          attributes: [[sequelize.fn("DISTINCT", sequelize.col(field)), field]],
+          where: {
+            [field]: {
+              [Op.not]: null, // Exclude null values
+            },
+          },
+          order: [[field, "ASC"]],
+        });
+
+        results[field] = uniqueValues
+          .map((item) => item[field])
+          .filter(Boolean);
+      })
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: results,
+    });
+  } catch (err) {
+    console.log(err);
     res.status(500).json({
       status: "error",
       message: err.message,

@@ -9,6 +9,7 @@ const Vehicle = sequelize.define(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
+      unique: true,
     },
     code: {
       type: DataTypes.STRING,

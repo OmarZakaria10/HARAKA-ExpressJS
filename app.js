@@ -1,10 +1,10 @@
 const express = require("express");
 const morgan = require("morgan");
-
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const app = express();
 
@@ -21,8 +21,8 @@ app.use((req, res, next) => {
   // console.log(req.headers);
   next();
 });
-
-app.use("/vehicles",vehicleRoutes);
+app.use(cors());
+app.use("/vehicles", vehicleRoutes);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

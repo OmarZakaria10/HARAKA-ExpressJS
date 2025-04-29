@@ -2,6 +2,7 @@
 const dotenv = require("dotenv");
 const db = require("./config/database");
 const Vehicle = require("./models/vehicleModel");
+
 db.connect();
 
 process.on("uncaughtException", (err) => {
@@ -11,6 +12,7 @@ process.on("uncaughtException", (err) => {
 });
 
 const app = require("./app");
+
 const psql = db.getSequelize();
 
 psql.sync({}).then(() => {
