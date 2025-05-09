@@ -1,7 +1,7 @@
 // File: index.js
 const dotenv = require("dotenv");
 const db = require("./config/database");
-const Vehicle = require("./models/vehicleModel");
+const { setupAssociations, Vehicle, License } = require("./models/models");
 
 db.connect();
 
@@ -17,6 +17,7 @@ const psql = db.getSequelize();
 
 psql.sync({}).then(() => {
   console.log("Database & tables created!");
+  setupAssociations();
 });
 
 const port = process.env.PORT || 8080;

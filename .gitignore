@@ -136,5 +136,12 @@ dist
 .pnp.*
 
 config.env
-records.json
-data.csv
+records*.json
+data*.csv
+licence.csv
+test*.json
+ro5s.csv
+licence*.csv
+licence*.xlsx
+vehicle*.json
+license*.json

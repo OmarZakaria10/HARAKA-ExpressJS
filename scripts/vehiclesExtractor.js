@@ -2,8 +2,8 @@ const fs = require("fs");
 const csv = require("csv-parser");
 
 const results = [];
-const INPUT_FILE = "data.csv";
-const OUTPUT_FILE = "records.json";
+const INPUT_FILE = "data2.csv";
+const OUTPUT_FILE = "records2.json";
 
 // Define the fields we want to process
 const FIELDS = [

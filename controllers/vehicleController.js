@@ -5,7 +5,7 @@ const database = require("../config/database");
 const sequelize = database.getSequelize();
 exports.getAllVehicles = async (req, res) => {
   try {
-    const vehicles = await Vehicle.findAll();
+    const vehicles = await Vehicle.findAll({ order: [["createdAt", "ASC"]] });
     res.status(200).json({
       status: "success",
       results: vehicles.length,
@@ -148,6 +148,37 @@ exports.getVehicleById = async (req, res) => {
     });
   }
 };
+
+exports.getVehicleByChassisNumber = async (req , res)=>{
+  try {
+    const {chassis_number}= req.params;
+    const vehicle = await Vehicle.findOne({
+      where: {
+        chassis_number:{
+          [Op.iLike]: `%${chassis_number}%`
+        }
+      }
+    })
+
+    if (!vehicle) {
+      res.status(404).json({
+        status: "fail",
+        message: "No vehicle found with this chassis number",
+      })
+    }
+    res.status(200).json({
+      status:"success",
+      data:{
+        vehicle
+      }
+    })
+  } catch (error) {
+    res.status(500).json({
+      status:"error",
+      message:error.message
+    })
+  }
+}
 
 // Create a new vehicle
 exports.createVehicle = async (req, res) => {
