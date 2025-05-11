@@ -89,6 +89,9 @@ exports.getAllLicenses = async (req, res) => {
   try {
     const licenses = await License.findAll({
       order: [["createdAt", "ASC"]],
+      attributes: {
+        include: ["validity_status"],
+      },
     });
     res.status(200).json({
       status: "success",
@@ -161,6 +164,34 @@ exports.getLicenseById = async (req, res) => {
     });
   }
 };
+// Gel license by vehicleId
+exports.getLicenseByVehicleId = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const license = await License.findOne({
+      where: {
+        vehicleId: id,
+      },
+    });
+    if (!license) {
+      res.status(400).json({
+        status: "fail",
+        message: "License not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      status: "success",
+      data: license,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
+
 // Get expiring licenses
 exports.getExpiringLicenses = async (req, res) => {
   try {

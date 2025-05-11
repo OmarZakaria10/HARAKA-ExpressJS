@@ -1,6 +1,7 @@
 // config/database.js
 const { Sequelize } = require("sequelize");
 const dotenv = require("dotenv");
+const { default: chalk } = require("chalk");
 dotenv.config({ path: "./config.env" });
 class Database {
   constructor() {
@@ -17,7 +18,29 @@ class Database {
         port: process.env.DB_PORT,
         dialect: "postgres",
         // logging: false,
-        logging: process.env.NODE_ENV === "development" ? console.log : false,
+        logging:
+          process.env.NODE_ENV === "development"
+            ? (query, timing) => {
+                const formattedQuery = query.replace(
+                  /\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|AND|OR|JOIN|GROUP BY|ORDER BY|LIMIT)\b/g,
+                  (match) => `\n${chalk.yellow(match)}`
+                );
+                console.log(
+                  "\n" +
+                    chalk.blue(
+                      "╔════ SQL Query ═══════════════════════════════════════════════╗"
+                    ) +
+                    "\n" +
+                    chalk.cyan(formattedQuery) +
+                    "\n" +
+                    chalk.blue(
+                      "╚════════════════════════════════════════════════════════════╝"
+                    ) +
+                    "\n" +
+                    chalk.gray(`Execution time: ${timing}ms`)
+                );
+              }
+            : false,
         pool: {
           max: 5,
           min: 0,

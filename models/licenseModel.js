@@ -36,10 +36,31 @@ class License extends Model {
         license_start_date: {
           type: DataTypes.DATE,
           allowNull: true,
+          get() {
+            if (!this.getDataValue("license_start_date")) return null;
+            return new Date(this.getDataValue("license_start_date"))
+              .toISOString()
+              .split("T")[0];
+          },
+          set(value) {
+            if (!value) return this.setDataValue("license_start_date", null);
+            this.setDataValue("license_start_date", new Date(value));
+          },
         },
+
         license_end_date: {
           type: DataTypes.DATE,
           allowNull: true,
+          get() {
+            if (!this.getDataValue("license_end_date")) return null;
+            return new Date(this.getDataValue("license_end_date"))
+              .toISOString()
+              .split("T")[0];
+          },
+          set(value) {
+            if (!value) return this.setDataValue("license_end_date", null);
+            this.setDataValue("license_end_date", new Date(value));
+          },
         },
         recipient: {
           type: DataTypes.STRING,
@@ -51,8 +72,22 @@ class License extends Model {
         },
         validity_status: {
           type: DataTypes.VIRTUAL,
-          allowNull: false,
-          defaultValue: "سارية",
+          get() {
+            if (!this.license_end_date) return "غير معروف";
+            const today = new Date();
+            const endDate = new Date(this.license_end_date);
+
+            if (endDate < today) {
+              return "منتهية";
+            }
+
+            const daysRemaining = this.get("days_remaining");
+            if (daysRemaining <= 30) {
+              return "قاربت على الانتهاء";
+            }
+
+            return "سارية";
+          },
         },
         violations: {
           type: DataTypes.TEXT,
