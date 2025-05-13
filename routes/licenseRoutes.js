@@ -1,8 +1,12 @@
 const express = require("express");
 const licenseController = require("../controllers/licenseController");
+const validatedLicense = require("../middlewares/validateLicense");
 const router = express.Router();
 
-router.post("/createLicense", licenseController.createLicense);
+router.post("/createLicense", 
+  validatedLicense.validateLicenseData,
+  licenseController.createLicense,
+);
 
 // Get license by id
 router.get("/getLicenseById", licenseController.getLicenseById);

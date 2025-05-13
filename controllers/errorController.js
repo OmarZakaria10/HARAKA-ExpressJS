@@ -32,6 +32,7 @@ const handleForeignKeyConstraintError = (err) => {
 };
 
 const sendErrorDev = (err, res) => {
+  console.log(err);
   res.status(err.statusCode).json({
     status: err.status,
     error: err,

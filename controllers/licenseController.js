@@ -5,62 +5,8 @@ const sequelize = database.getSequelize();
 
 exports.createLicense = async (req, res) => {
   try {
-    const licenseData = { ...req.body };
-    const requiredFields = ["plate_number", "license_type", "chassis_number"];
-    const missingFields = requiredFields.filter((field) => !licenseData[field]);
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        status: "fail",
-        message: `Missing required fields: ${missingFields.join(", ")}`,
-      });
-    }
-    if (licenseData.license_start_date && licenseData.license_end_date) {
-      const startDate = new Date(licenseData.license_start_date);
-      const endDate = new Date(licenseData.license_end_date);
-      if (endDate < startDate) {
-        return res.status(400).json({
-          status: "fail",
-          message: "End date cannot be before start date",
-        });
-      }
-    }
-    if (licenseData.vehicleId) {
-      const vehicle = await Vehicle.findByPk(licenseData.vehicleId);
-      if (!vehicle) {
-        return res.status(404).json({
-          status: "fail",
-          message: "Vehicle not found",
-        });
-      }
-    }
-    // Check for duplicate plate number
-    const existingLicense = await License.findOne({
-      where: {
-        [Op.not]: [{ id: licenseData.id }], // Exclude current license if updating
-        [Op.or]: [
-          { plate_number: licenseData.plate_number },
-          { chassis_number: licenseData.chassis_number },
-          { vehicleId: licenseData.vehicleId },
-        ],
-      },
-    });
-    if (existingLicense) {
-      return res.status(400).json({
-        status: "fail",
-        message: "A license with this plate number already exists",
-      });
-    }
-    if (!licenseData.vehicleId) {
-      const vehicleId = Vehicle.findOne({
-        attributes: ["id"],
-        where: {
-          chassis_number: {
-            [Op.substring]: licenseData.chassis_number,
-          },
-        },
-      });
-      if (vehicleId) licenseData.vehicleId = vehicleId;
-    }
+    const licenseData = req.validatedLicense;
+    // console.log(licenseData);
     const newLicense = await License.create(licenseData);
     // Fetch the created license with vehicle details
     const licenseWithVehicle = await License.findByPk(newLicense.id, {
