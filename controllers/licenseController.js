@@ -169,7 +169,7 @@ exports.deleteLicense = catchAsync(async (req, res) => {
 });
 // Get unique field values for filtering
 exports.getUniqueFieldValues = catchAsync(async (req, res) => {
-  const fields = { ...req.query };
+  const { fields } = { ...req.query };
   if (!fields) {
     return res.status(400).json({
       status: "fail",
