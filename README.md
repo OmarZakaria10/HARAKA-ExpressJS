@@ -1,23 +1,23 @@
-# Future of Egypt - Vehicle Management System
+# HARAKA-Express - Vehicle & License Management System
 
-A comprehensive vehicle management system built with Node.js, Express, and Sequelize to manage and track vehicle fleets.
+A comprehensive system for managing vehicles and their licenses, built with Node.js, Express, and Sequelize.
 
 ## Features
 
-- Vehicle tracking with detailed information
+- Complete vehicle management system
+- License tracking and validation
 - Multiple plate number types support (Malaky, Gesh, Mokhabrat)
-- GPS device tracking
-- Vehicle maintenance and insurance status tracking
-- Sector and administration management
-- Advanced search and filtering capabilities
-- Full CRUD operations for vehicles
+- GPS device and line number tracking
+- Advanced filtering and search capabilities
+- Expiring license notifications
+- Full CRUD operations for both vehicles and licenses
 
 ## Tech Stack
 
 - Node.js
 - Express.js
 - Sequelize ORM
-- MySQL/PostgreSQL (Database)
+- PostgreSQL
 - REST API
 
 ## Installation
@@ -25,7 +25,7 @@ A comprehensive vehicle management system built with Node.js, Express, and Seque
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd futureOfEgypt
+cd HARAKA-Express
 ```
 
 2. Install dependencies:
@@ -33,37 +33,46 @@ cd futureOfEgypt
 npm install
 ```
 
-3. Create a `.env` file in the root directory and add your configuration:
+3. Create a `config.env` file in the root directory:
 ```env
-DB_HOST=localhost
+DB_NAME=your_database
 DB_USER=your_username
-DB_PASS=your_password
-DB_NAME=future_egypt
-PORT=3000
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
+PORT=8080
+NODE_ENV=development
 ```
 
-4. Run database migrations:
+4. Start the development server:
 ```bash
-npx sequelize-cli db:migrate
-```
-
-5. Start the server:
-```bash
-npm start
+npm run dev
 ```
 
 ## API Endpoints
 
 ### Vehicles
-
-- `GET /vehicles` - Get all vehicles
-- `GET /vehicles/:id` - Get a specific vehicle
+- `GET /vehicles/getAllVehicles` - Get all vehicles
+- `GET /vehicles/getVehicle/:id` - Get vehicle by ID
+- `GET /vehicles/getFilteredVehicles` - Get filtered vehicles
 - `POST /vehicles/createVehicle` - Create a new vehicle
 - `PATCH /vehicles/updateVehicle/:id` - Update a vehicle
 - `DELETE /vehicles/deleteVehicle/:id` - Delete a vehicle
+- `GET /vehicles/getUniqueFieldValues` - Get unique field values for filtering
 
-## Vehicle Model Structure
+### Licenses
+- `GET /licenses/getAllLicenses` - Get all licenses
+- `GET /licenses/getLicenseById/:id` - Get license by ID
+- `POST /licenses/createLicense` - Create a new license
+- `PATCH /licenses/updateLicense/:id` - Update a license
+- `DELETE /licenses/deleteLicense/:id` - Delete a license
+- `GET /licenses/getExpiredLicenses` - Get expired licenses
+- `GET /licenses/getExpiringLicenses` - Get licenses about to expire
+- `GET /licenses/getLicenseByVehicleId/:id` - Get license by vehicle ID
 
+## Data Models
+
+### Vehicle Model
 ```javascript
 {
   id: UUID,
@@ -89,28 +98,47 @@ npm start
 }
 ```
 
+### License Model
+```javascript
+{
+  id: UUID,
+  serial_number: Integer,
+  plate_number: String,
+  license_type: String,
+  vehicle_type: String,
+  chassis_number: String,
+  license_start_date: Date,
+  license_end_date: Date,
+  recipient: String,
+  notes: Text,
+  violations: Text,
+  vehicleId: UUID,
+  validity_status: Virtual
+}
+```
+
 ## Data Validation
 
-- Unique chassis numbers
-- Valid model years (between 1800 and current year + 1)
-- Unique plate numbers
+### Vehicles
+- Unique chassis numbers and plate numbers
+- Valid model years
 - JSON storage for flexible notes
+
+### Licenses
+- Required fields validation
+- Date range validation
+- Duplicate license prevention
+- Automatic vehicle association
+- License validity status tracking
 
 ## Error Handling
 
 The API implements comprehensive error handling:
 - 404 for resources not found
-- 400 for invalid requests
+- 400 for validation errors
 - 500 for server errors
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- Custom error messages for operational errors
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
