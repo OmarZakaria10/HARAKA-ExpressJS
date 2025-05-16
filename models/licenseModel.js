@@ -15,11 +15,11 @@ class License extends Model {
         },
         serial_number: {
           type: DataTypes.INTEGER,
-          allowNull: true,
         },
         plate_number: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
         },
         license_type: {
           type: DataTypes.STRING,
@@ -27,11 +27,11 @@ class License extends Model {
         },
         vehicle_type: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         chassis_number: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
         },
         license_start_date: {
           type: DataTypes.DATE,
@@ -64,11 +64,9 @@ class License extends Model {
         },
         recipient: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         notes: {
           type: DataTypes.TEXT,
-          allowNull: true,
         },
         validity_status: {
           type: DataTypes.VIRTUAL,
@@ -91,7 +89,6 @@ class License extends Model {
         },
         violations: {
           type: DataTypes.TEXT,
-          allowNull: true,
         },
         // Foreign key to link with Vehicle
         vehicleId: {
@@ -168,18 +165,15 @@ class License extends Model {
   }
 
   // Static methods
-  static async getExpiringLicenses(daysThreshold = 30) {
-    const thresholdDate = new Date();
-    thresholdDate.setDate(thresholdDate.getDate() + daysThreshold);
-
+  static async getExpiringLicensesBefore(date) {
+    const thresholdDate = new Date(date);
     return await this.findAll({
       where: {
         license_end_date: {
-          [sequelize.Op.between]: [new Date(), thresholdDate],
+          [Op.lte]: thresholdDate,
         },
-        validity_status: "سارية",
       },
-      include: [{ model: sequelize.models.Vehicle, as: "vehicle" }],
+      include: [{ model: Vehicle, as: "vehicle" }],
       order: [["license_end_date", "ASC"]],
     });
   }

@@ -15,7 +15,7 @@ const app = require("./app");
 
 const psql = db.getSequelize();
 
-psql.sync({}).then(() => {
+psql.sync().then(() => {
   console.log("Database & tables created!");
   setupAssociations();
 });

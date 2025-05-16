@@ -18,36 +18,28 @@ class Vehicle extends Model {
         },
         chassis_number: {
           type: DataTypes.STRING,
-          // allowNull: false,
           unique: true,
         },
         vehicle_type: {
           type: DataTypes.STRING,
-          // allowNull: false,
         },
         vehicle_equipment: {
           type: DataTypes.STRING,
-          // allowNull: false,
         },
         plate_number_malaky: {
           type: DataTypes.STRING,
-          allowNull: true,
           unique: true,
         },
         plate_number_gesh: {
           type: DataTypes.STRING,
-          allowNull: true,
           unique: true,
         },
         plate_number_mokhabrat: {
           type: DataTypes.STRING,
-          allowNull: true,
           unique: true,
         },
         engine_number: {
           type: DataTypes.STRING,
-          allowNull: true,
-          // unique: true
         },
         color: {
           type: DataTypes.STRING,
@@ -55,15 +47,12 @@ class Vehicle extends Model {
         },
         gps_device_number: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         line_number: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         sector: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         model_year: {
           type: DataTypes.INTEGER,
@@ -83,23 +72,18 @@ class Vehicle extends Model {
         },
         fuel_type: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         administration: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         responsible_person: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         supply_source: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         insurance_status: {
           type: DataTypes.STRING,
-          allowNull: true,
         },
         notes: {
           type: DataTypes.JSON,

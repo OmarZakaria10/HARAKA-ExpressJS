@@ -3,9 +3,10 @@ const licenseController = require("../controllers/licenseController");
 const validatedLicense = require("../middlewares/validateLicense");
 const router = express.Router();
 
-router.post("/createLicense", 
+router.post(
+  "/createLicense",
   validatedLicense.validateLicenseData,
-  licenseController.createLicense,
+  licenseController.createLicense
 );
 
 // Get license by id
@@ -34,6 +35,6 @@ router.get("/getExpiredLicenses", licenseController.getExpiredLicenses);
 router.get("/getUniqueFieldValues", licenseController.getUniqueFieldValues);
 
 // Get expiring licenses
-router.get("/getExpiringLicenses", licenseController.getExpiringLicenses);
+router.get("/getExpiringLicenses", licenseController.getExpiringLicensesBefore);
 
 module.exports = router;
