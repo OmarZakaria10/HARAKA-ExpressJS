@@ -10,5 +10,7 @@ router.get("/getFilteredVehicles", vehicleController.getFilteredVehicles);
 router.patch("/updateVehicle/:id", vehicleController.updateVehicle);
 router.delete("/deleteVehicle/:id", vehicleController.deleteVehicle);
 router.get("/getUniqueFieldValues", vehicleController.getUniqueFieldValues);
+router.get("/getVehiclesBySector/:sector", vehicleController.getVehiclesBySector);
+router.get("/getVehiclesByAdminstration/:adminstration", vehicleController.getVehiclesByAdministration);
 
 module.exports = router;

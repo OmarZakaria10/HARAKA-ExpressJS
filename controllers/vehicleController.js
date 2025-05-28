@@ -254,3 +254,58 @@ exports.getUniqueFieldValues = catchAsync(async (req, res) => {
     data: results,
   });
 });
+
+exports.getVehiclesBySector = catchAsync(async (req, res) => {
+  const { sector } = req.params;
+  const vehicles = await Vehicle.findAll({
+    where: {
+      sector: {
+        [Op.eq]: `${sector}`,
+      },
+    },
+    order: [["createdAt", "ASC"]],
+  });
+
+  if (vehicles.length === 0) {
+    return res.status(404).json({
+      status: "fail",
+      message: "No vehicles found for this sector",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    results: vehicles.length,
+    data: {
+      vehicles,
+    },
+  });
+});
+exports.getVehiclesByAdministration = catchAsync(async (req, res) => {
+  const { administration } = req.params;
+  const vehicles = await Vehicle.findAll({
+    where: {
+      administration: {
+        [Op.eq]: `${administration}`,
+      },
+    },
+    order: [["createdAt", "ASC"]],
+  });
+
+  if (vehicles.length === 0) {
+    return res.status(404).json({
+      status: "fail",
+      message: "No vehicles found for this administration",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    results: vehicles.length,
+    data: {
+      vehicles,
+    },
+  });
+}
+);
+
