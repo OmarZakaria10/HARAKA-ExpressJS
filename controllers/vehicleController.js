@@ -78,7 +78,7 @@ exports.getFilteredVehicles = catchAsync(async (req, res) => {
 
   // Handle pagination
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
+  const limit = parseInt(req.query.limit, 10) || 500;
   const offset = (page - 1) * limit;
 
   // Handle sorting
