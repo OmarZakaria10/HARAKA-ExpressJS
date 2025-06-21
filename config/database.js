@@ -1,7 +1,10 @@
 // config/database.js
 const { Sequelize } = require("sequelize");
 const dotenv = require("dotenv");
-const { default: chalk } = require("chalk");
+let chalk = null;
+if (process.env.NODE_ENV === "development") {
+  chalk = require("chalk");
+}
 dotenv.config({ path: "./config.env" });
 class Database {
   constructor() {
