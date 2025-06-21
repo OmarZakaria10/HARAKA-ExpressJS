@@ -27,7 +27,7 @@ coverage
 .nyc_output
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
+.gruntelharaka.dump
 
 # Bower dependency directory (https://bower.io/)
 bower_components
@@ -45,7 +45,7 @@ jspm_packages/
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
-# TypeScript cache
+# TypeScript cacheelharaka.dump
 *.tsbuildinfo
 
 # Optional npm cache directory
@@ -145,3 +145,5 @@ licence*.csv
 licence*.xlsx
 vehicle*.json
 license*.json
+
+elharaka.dump

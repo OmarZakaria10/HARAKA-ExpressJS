@@ -38,3 +38,5 @@ logs
 # OS files
 .DS_Store
 Thumbs.db
+
+elharaka.dump

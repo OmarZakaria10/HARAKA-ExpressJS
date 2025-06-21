@@ -9,15 +9,16 @@ class Database {
       return Database.instance;
     }
 
-    this.sequelize = new Sequelize(
-      process.env.DB_NAME,
-      process.env.DB_USER,
-      process.env.DB_PASSWORD,
-      {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
+    // Use DATABASE_URL if available, otherwise use individual params
+    if (process.env.DATABASE_URL) {
+      this.sequelize = new Sequelize(process.env.DATABASE_URL, {
         dialect: "postgres",
-        // logging: false,
+        dialectOptions: {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        },
         logging:
           process.env.NODE_ENV === "development"
             ? (query, timing) => {
@@ -47,8 +48,49 @@ class Database {
           acquire: 30000,
           idle: 10000,
         },
-      }
-    );
+      });
+    } else {
+      this.sequelize = new Sequelize(
+        process.env.DB_NAME,
+        process.env.DB_USER,
+        process.env.DB_PASSWORD,
+        {
+          host: process.env.DB_HOST,
+          port: process.env.DB_PORT,
+          dialect: "postgres",
+          // logging: false,
+          logging:
+            process.env.NODE_ENV === "development"
+              ? (query, timing) => {
+                  const formattedQuery = query.replace(
+                    /\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|AND|OR|JOIN|GROUP BY|ORDER BY|LIMIT)\b/g,
+                    (match) => `\n${chalk.yellow(match)}`
+                  );
+                  console.log(
+                    "\n" +
+                      chalk.blue(
+                        "╔════ SQL Query ═══════════════════════════════════════════════╗"
+                      ) +
+                      "\n" +
+                      chalk.cyan(formattedQuery) +
+                      "\n" +
+                      chalk.blue(
+                        "╚════════════════════════════════════════════════════════════╝"
+                      ) +
+                      "\n" +
+                      chalk.gray(`Execution time: ${timing}ms`)
+                  );
+                }
+              : false,
+          pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000,
+          },
+        }
+      );
+    }
 
     Database.instance = this;
   }
