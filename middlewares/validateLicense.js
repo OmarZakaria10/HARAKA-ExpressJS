@@ -57,12 +57,14 @@ exports.validateLicenseData = catchAsync(async (req, res, next) => {
     // 5. If no vehicleId provided, try to find matching vehicle by chassis number
     const vehicle = await Vehicle.findOne({
       where: {
-        chassis_number: licenseData.chassis_number
+        chassis_number: {
+          [Op.iLike]: `%${licenseData.chassis_number}`
+        }
       }
     });
     licenseData.vehicleId = vehicle ? vehicle.id : null;
+    licenseData.chassis_number = vehicle ? vehicle.chassis_number : licenseData.chassis_number;
   }
-
   req.validatedLicense = licenseData;
   next();
 });

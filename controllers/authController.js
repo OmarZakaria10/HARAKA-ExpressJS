@@ -18,19 +18,19 @@ const createSendToken = (user, statusCode, res) => {
     ),
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax',
+    path: '/' // Ensure path is set
   };
 
   res.cookie("jwt", token, cookieOptions);
-
   user.password = undefined;
-
+  
   res.status(statusCode).json({
     status: "success",
     token,
     data: { user },
   });
 };
-
 
 exports.changeUserPassword = catchAsync(async (req, res, next) => {
   const { userId, newPassword } = req.body;
@@ -49,64 +49,58 @@ exports.changeUserPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-
 exports.login = catchAsync(async (req, res, next) => {
   const { username, password } = req.body;
-
   // 1) Check if username and password exist
   if (!username || !password) {
     return next(new AppError("Please provide username and password!", 400));
   }
-
   // 2) Check if user exists && password is correct
   const user = await User.findOne({
     where: { username },
     attributes: { include: ['password'] } // Explicitly include password for verification
   });
-
   if (!user || !(await user.correctPassword(password))) {
     return next(new AppError("Incorrect username or password", 401));
   }
-
   // 3) Check if user is active
   if (!user.active) {
     return next(new AppError("Your account has been deactivated", 401));
   }
-
   // 4) If everything ok, send token
   createSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
-    try {
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-
-  if (!token) {
-    return next(new AppError("Please log in to get access.", 401));
-  }
-
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-  const user = await User.findByPk(decoded.id);
-  if (!user) {
-    return next(new AppError("User no longer exists.", 401));
-  }
-
-  if (user.changedPasswordAfter(decoded.iat)) {
-    return next(new AppError("Password recently changed! Please log in again.", 401));
-  }
-
-  req.user = user;
-  next();
-    } catch (error) {
+  try {
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    } else if (req.cookies.jwt && req.cookies.jwt !== 'loggedout') {
+      token = req.cookies.jwt;
+    }
+    
+    if (!token) {
+      return next(new AppError("Please log in to get access.", 401));
+    }
+    
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id);
+    
+    if (!user) {
+      return next(new AppError("User no longer exists.", 401));
+    }
+    
+    if (user.changedPasswordAfter(decoded.iat)) {
+      return next(new AppError("Password recently changed! Please log in again.", 401));
+    }
+    
+    req.user = user;
+    next();
+  } catch (error) {
     return next(new AppError('Invalid token. Please log in again.', 401));
   }
 });
@@ -122,10 +116,27 @@ exports.restrictTo = (...roles) => {
   };
 };
 
+// Fixed logout function
 exports.logout = (req, res) => {
+  // Method 1: Clear cookie properly
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax',
+    path: '/'
+  });
+
+  // Method 2: Also set a dummy cookie as fallback (your original approach)
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax',
+    path: '/'
   });
-  res.status(200).json({ status: "success" });
+
+  res.status(200).json({ 
+    status: "success",
+    message: "Logged out successfully"
+  });
 };

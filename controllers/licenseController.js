@@ -6,7 +6,15 @@ const sequelize = database.getSequelize();
 
 exports.createLicense = catchAsync(async (req, res) => {
   const licenseData = req.validatedLicense;
+
   const newLicense = await License.create(licenseData);
+  if (newLicense.vehicleId) {
+    // Update the vehicle's plate_number_malaky to match the license's plate_number
+    await Vehicle.update(
+      { plate_number_malaky: newLicense.plate_number },
+      { where: { id: newLicense.vehicleId } }
+    );
+  }
   // Fetch the created license with vehicle details
   const licenseWithVehicle = await License.findByPk(newLicense.id, {
     include: [

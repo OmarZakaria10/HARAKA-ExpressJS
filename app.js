@@ -23,12 +23,9 @@ app.use((req, res, next) => {
   // console.log(req.headers);
   next();
 });
-
-
-// Instead of using cors() with default options, configure it like this:
 app.use(cors({
-    origin: 'http://localhost:3000', // Your React app's URL
-    credentials: true                // Allow credentials
+  origin: true, // Reflects the request origin
+  credentials: true
 }));
 app.use("/users", userRouter);
 app.use("/vehicles", vehicleRoutes);

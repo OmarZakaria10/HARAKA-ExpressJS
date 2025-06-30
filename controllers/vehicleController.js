@@ -3,6 +3,14 @@ const { Op } = require("sequelize");
 const database = require("../config/database");
 const catchAsync = require("../utils/catchAsync");
 const sequelize = database.getSequelize();
+
+  const roleColumns = {
+    admin: null, // null means all columns
+    manager: ["id", "plate_number", "model", "chassis_number", "sector", "createdAt"],
+    user: ["id", "plate_number", "model", "sector"],
+    // Add more roles as needed
+  };
+
 exports.getAllVehicles = catchAsync(async (req, res) => {
   const vehicles = await Vehicle.findAll({ order: [["createdAt", "ASC"]] });
   res.status(200).json({
