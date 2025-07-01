@@ -3,16 +3,21 @@ const { Op } = require("sequelize");
 const database = require("../config/database");
 const catchAsync = require("../utils/catchAsync");
 const sequelize = database.getSequelize();
+const vehiclesRoleColumns = require("../config/vehiclesRoleColumns");
 
-  const roleColumns = {
-    admin: null, // null means all columns
-    manager: ["id", "plate_number", "model", "chassis_number", "sector", "createdAt"],
-    user: ["id", "plate_number", "model", "sector"],
-    // Add more roles as needed
-  };
+// Helper function to get attributes based on user role
+const getRoleAttributes = (userRole) => {
+  console.log(vehiclesRoleColumns[userRole])
+  console.log("user: ",vehiclesRoleColumns["user"])
+  return vehiclesRoleColumns[userRole] || vehiclesRoleColumns["user"];
+};
 
 exports.getAllVehicles = catchAsync(async (req, res) => {
-  const vehicles = await Vehicle.findAll({ order: [["createdAt", "ASC"]] });
+  console.log(req.user.role)
+  const vehicles = await Vehicle.findAll({
+    attributes: getRoleAttributes(req.user.role),
+    order: [["createdAt", "ASC"]],
+  });
   res.status(200).json({
     status: "success",
     results: vehicles.length,
@@ -27,6 +32,7 @@ exports.getFilteredVehicles = catchAsync(async (req, res) => {
   const whereClause = {};
   const modelAttributes = Vehicle.getAttributes();
   const validColumns = Object.keys(modelAttributes);
+  const roleAttributes = getRoleAttributes(req.user.role);
 
   // Process each query parameter
   Object.keys(req.query).forEach((key) => {
@@ -98,8 +104,9 @@ exports.getFilteredVehicles = catchAsync(async (req, res) => {
     }
   }
 
-  // Execute query with all filters
+  // Execute query with all filters and role-based attributes
   const vehicles = await Vehicle.findAndCountAll({
+    attributes: roleAttributes,
     where: whereClause,
     limit,
     offset,
@@ -118,9 +125,12 @@ exports.getFilteredVehicles = catchAsync(async (req, res) => {
     },
   });
 });
+
 // Get a single vehicle by ID
 exports.getVehicleById = catchAsync(async (req, res) => {
-  const vehicle = await Vehicle.findByPk(req.params.id);
+  const vehicle = await Vehicle.findByPk(req.params.id, {
+    attributes: getRoleAttributes(req.user.role),
+  });
   if (!vehicle) {
     return res.status(404).json({
       status: "fail",
@@ -138,6 +148,7 @@ exports.getVehicleById = catchAsync(async (req, res) => {
 exports.getVehicleByChassisNumber = catchAsync(async (req, res) => {
   const { chassis_number } = req.params;
   const vehicle = await Vehicle.findOne({
+    attributes: getRoleAttributes(req.user.role),
     where: {
       chassis_number: {
         [Op.iLike]: `%${chassis_number}%`,
@@ -146,7 +157,7 @@ exports.getVehicleByChassisNumber = catchAsync(async (req, res) => {
   });
 
   if (!vehicle) {
-    res.status(404).json({
+    return res.status(404).json({
       status: "fail",
       message: "No vehicle found with this chassis number",
     });
@@ -169,10 +180,16 @@ exports.createVehicle = catchAsync(async (req, res) => {
         : parseInt(vehicleData.modelYear, 10);
   }
   const newVehicle = await Vehicle.create(vehicleData);
+  
+  // Fetch the created vehicle with role-based attributes
+  const vehicleWithRoleAttributes = await Vehicle.findByPk(newVehicle.id, {
+    attributes: getRoleAttributes(req.user.role),
+  });
+  
   res.status(201).json({
     status: "success",
     data: {
-      vehicle: newVehicle,
+      vehicle: vehicleWithRoleAttributes,
     },
   });
 });
@@ -195,7 +212,9 @@ exports.updateVehicle = catchAsync(async (req, res) => {
       message: "Vehicle not found",
     });
   }
-  const updatedVehicle = await Vehicle.findByPk(req.params.id);
+  const updatedVehicle = await Vehicle.findByPk(req.params.id, {
+    attributes: getRoleAttributes(req.user.role),
+  });
   res.status(200).json({
     status: "success",
     data: {
@@ -220,10 +239,8 @@ exports.deleteVehicle = catchAsync(async (req, res) => {
     data: null,
   });
 });
-
 exports.getUniqueFieldValues = catchAsync(async (req, res) => {
   const { fields } = req.query; // Expect fields as comma-separated string
-  console.log(fields);
   if (!fields) {
     return res.status(400).json({
       status: "fail",
@@ -231,20 +248,10 @@ exports.getUniqueFieldValues = catchAsync(async (req, res) => {
     });
   }
   const fieldArray = fields.split(",");
-  const modelAttributes = Vehicle.getAttributes();
-  const validFields = fieldArray.filter((field) =>
-    Object.keys(modelAttributes).includes(field)
-  );
-  if (validFields.length === 0) {
-    return res.status(400).json({
-      status: "fail",
-      message: "No valid fields provided",
-    });
-  }
   const results = {};
-  // Get unique values for each valid field
+  // Get unique values for each requested field (no constraints)
   await Promise.all(
-    validFields.map(async (field) => {
+    fieldArray.map(async (field) => {
       const uniqueValues = await Vehicle.findAll({
         attributes: [[sequelize.fn("DISTINCT", sequelize.col(field)), field]],
         where: {
@@ -262,10 +269,10 @@ exports.getUniqueFieldValues = catchAsync(async (req, res) => {
     data: results,
   });
 });
-
 exports.getVehiclesBySector = catchAsync(async (req, res) => {
   const { sector } = req.params;
   const vehicles = await Vehicle.findAll({
+    attributes: getRoleAttributes(req.user.role),
     where: {
       sector: {
         [Op.eq]: `${sector}`,
@@ -289,9 +296,11 @@ exports.getVehiclesBySector = catchAsync(async (req, res) => {
     },
   });
 });
+
 exports.getVehiclesByAdministration = catchAsync(async (req, res) => {
   const { administration } = req.params;
   const vehicles = await Vehicle.findAll({
+    attributes: getRoleAttributes(req.user.role),
     where: {
       administration: {
         [Op.eq]: `${administration}`,
@@ -314,6 +323,4 @@ exports.getVehiclesByAdministration = catchAsync(async (req, res) => {
       vehicles,
     },
   });
-}
-);
-
+});

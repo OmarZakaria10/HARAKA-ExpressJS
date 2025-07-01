@@ -17,6 +17,7 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json({ limit: "10kb" }));
 // Serving static files
 app.use(express.static(`${__dirname}/public`));
+app.use(express.static(`${__dirname}/build`));
 app.use(cookieParser());
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
@@ -30,7 +31,9 @@ app.use(cors({
 app.use("/users", userRouter);
 app.use("/vehicles", vehicleRoutes);
 app.use("/licenses", licenseRoutes);
-
+app.get("/", (req, res) => {
+  res.sendFile(`${__dirname}/build/index.html`);
+});
 
 
 app.all("*", (req, res, next) => {

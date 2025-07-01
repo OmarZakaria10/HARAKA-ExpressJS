@@ -23,7 +23,7 @@ class Database {
           },
         },
         logging:
-          process.env.NODE_ENV === "development"
+          process.env.NODE_ENV === "development" && chalk
             ? (query, timing) => {
                 const formattedQuery = query.replace(
                   /\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|AND|OR|JOIN|GROUP BY|ORDER BY|LIMIT)\b/g,
