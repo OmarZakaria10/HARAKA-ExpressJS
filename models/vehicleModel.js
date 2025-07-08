@@ -151,6 +151,11 @@ class Vehicle extends Model {
       as: "license",
       onDelete: "CASCADE", // If vehicle is deleted, delete associated license
     });
+    this.hasOne(models.MilitaryLicense, {
+      foreignKey: "vehicleId",
+      as: "militaryLicense",
+      onDelete: "CASCADE",
+    });
   }
 }
 

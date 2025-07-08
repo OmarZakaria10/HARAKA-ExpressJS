@@ -7,13 +7,13 @@ const vehiclesRoleColumns = require("../config/vehiclesRoleColumns");
 
 // Helper function to get attributes based on user role
 const getRoleAttributes = (userRole) => {
-  console.log(vehiclesRoleColumns[userRole])
-  console.log("user: ",vehiclesRoleColumns["user"])
+  // console.log(vehiclesRoleColumns[userRole]);
+  // console.log("user: ", vehiclesRoleColumns["user"]);
   return vehiclesRoleColumns[userRole] || vehiclesRoleColumns["user"];
 };
 
 exports.getAllVehicles = catchAsync(async (req, res) => {
-  console.log(req.user.role)
+  // console.log(req.user.role);
   const vehicles = await Vehicle.findAll({
     attributes: getRoleAttributes(req.user.role),
     order: [["createdAt", "ASC"]],
@@ -110,7 +110,7 @@ exports.getFilteredVehicles = catchAsync(async (req, res) => {
     where: whereClause,
     limit,
     offset,
-    order,
+    order: [["createdAt", "ASC"]],
   });
 
   // Send response
@@ -130,6 +130,7 @@ exports.getFilteredVehicles = catchAsync(async (req, res) => {
 exports.getVehicleById = catchAsync(async (req, res) => {
   const vehicle = await Vehicle.findByPk(req.params.id, {
     attributes: getRoleAttributes(req.user.role),
+    order: [["createdAt", "ASC"]],
   });
   if (!vehicle) {
     return res.status(404).json({
@@ -154,6 +155,7 @@ exports.getVehicleByChassisNumber = catchAsync(async (req, res) => {
         [Op.iLike]: `%${chassis_number}%`,
       },
     },
+    order: [["createdAt", "ASC"]],
   });
 
   if (!vehicle) {
@@ -180,12 +182,13 @@ exports.createVehicle = catchAsync(async (req, res) => {
         : parseInt(vehicleData.modelYear, 10);
   }
   const newVehicle = await Vehicle.create(vehicleData);
-  
+
   // Fetch the created vehicle with role-based attributes
   const vehicleWithRoleAttributes = await Vehicle.findByPk(newVehicle.id, {
     attributes: getRoleAttributes(req.user.role),
+    order: [["createdAt", "ASC"]],
   });
-  
+
   res.status(201).json({
     status: "success",
     data: {
@@ -214,6 +217,7 @@ exports.updateVehicle = catchAsync(async (req, res) => {
   }
   const updatedVehicle = await Vehicle.findByPk(req.params.id, {
     attributes: getRoleAttributes(req.user.role),
+    order: [["createdAt", "ASC"]],
   });
   res.status(200).json({
     status: "success",

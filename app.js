@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const userRouter = require("./routes/userRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const licenseRoutes = require("./routes/licenseRoutes");
+const militaryLicenseRoutes = require("./routes/militaryLicenseRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const cookieParser = require("cookie-parser");
@@ -31,6 +32,7 @@ app.use(cors({
 app.use("/users", userRouter);
 app.use("/vehicles", vehicleRoutes);
 app.use("/licenses", licenseRoutes);
+app.use("/military-licenses", militaryLicenseRoutes);
 app.get("/", (req, res) => {
   res.sendFile(`${__dirname}/build/index.html`);
 });

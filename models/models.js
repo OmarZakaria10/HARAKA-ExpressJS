@@ -1,17 +1,18 @@
 const Vehicle = require('./vehicleModel');
 const License = require('./licenseModel');
+const MilitaryLicense = require('./militaryLicenseModel');
 
 // Set up associations between models
 const setupAssociations = () => {
-  // Call associate methods on each model to establish relationships
-  Vehicle.associate({ License });
+  Vehicle.associate({ License, MilitaryLicense });
   License.associate({ Vehicle });
-  
+  MilitaryLicense.associate({ Vehicle });
   console.log('Model associations have been established');
 };
 
 module.exports = {
   setupAssociations,
   Vehicle,
-  License
+  License,
+  MilitaryLicense
 };

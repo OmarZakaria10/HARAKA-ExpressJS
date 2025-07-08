@@ -13,7 +13,8 @@ const filterObj = (obj, ...allowedFields) => {
 
 exports.getAllUsers = catchAsync(async (req, res) => {
   const users = await User.findAll({
-    attributes: { exclude: ['password'] }
+    attributes: { exclude: ['password'] },
+    order: [["createdAt", "ASC"]],
   });
 
   res.status(200).json({

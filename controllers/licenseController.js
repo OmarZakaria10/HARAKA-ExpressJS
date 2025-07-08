@@ -23,6 +23,7 @@ exports.createLicense = catchAsync(async (req, res) => {
         as: "vehicle",
       },
     ],
+    order: [["createdAt", "ASC"]],
   });
   res.status(201).json({
     status: "success",
@@ -74,6 +75,7 @@ exports.getLicenseById = catchAsync(async (req, res) => {
         as: "vehicle",
       },
     ],
+    order: [["createdAt", "ASC"]],
   });
   if (!license) {
     return res.status(404).json({
@@ -95,6 +97,7 @@ exports.getLicenseByVehicleId = catchAsync(async (req, res) => {
     where: {
       vehicleId: id,
     },
+    order: [["createdAt", "ASC"]],
   });
   if (!license) {
     res.status(400).json({
@@ -151,6 +154,7 @@ exports.updateLicense = catchAsync(async (req, res) => {
         as: "vehicle",
       },
     ],
+    order: [["createdAt", "ASC"]],
   });
   res.status(200).json({
     status: "success",
@@ -195,6 +199,7 @@ exports.getUniqueFieldValues = catchAsync(async (req, res) => {
             [Op.not]: null,
           },
         },
+        order: [[field, "ASC"]],
       });
       results[field] = values.map((item) => item[field]).filter(Boolean);
     })
