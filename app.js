@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const path = require("path");
 const userRouter = require("./routes/userRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const licenseRoutes = require("./routes/licenseRoutes");
@@ -16,30 +17,27 @@ if (process.env.NODE_ENV === "development") {
 }
 
 app.use(express.json({ limit: "10kb" }));
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
-app.use(express.static(`${__dirname}/build`));
+app.use(express.static(path.join(__dirname, "build")));
 app.use(cookieParser());
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log(req.headers);
   next();
 });
+
 app.use(cors({
-  origin: true, // Reflects the request origin
+  origin: true,
   credentials: true
 }));
-app.use("/users", userRouter);
-app.use("/vehicles", vehicleRoutes);
-app.use("/licenses", licenseRoutes);
-app.use("/military-licenses", militaryLicenseRoutes);
-app.get("/", (req, res) => {
-  res.sendFile(`${__dirname}/build/index.html`);
-});
 
+// API Routes - these must come BEFORE the catch-all
+app.use("/api/users", userRouter);           // Consider prefixing with /api
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/licenses", licenseRoutes);
+app.use("/api/military-licenses", militaryLicenseRoutes);
 
-app.all("*", (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 app.use(globalErrorHandler);
