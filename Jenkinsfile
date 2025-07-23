@@ -26,21 +26,17 @@ pipeline {
     
     stages {
         stage('Checkout & Setup') {
-            parallel {
-                stage('Checkout Backend') {
-                    steps {
-                        // Clean workspace and checkout
-                        cleanWs()
-                        checkout scm
-                    }
-                }
-                stage('Checkout Frontend') {
-                    steps {
-                        dir('frontend-temp') {
-                            git branch: 'main', 
-                                url: "${FRONTEND_REPO}"
-                        }
-                    }
+            steps {
+                // Clean workspace first
+                cleanWs()
+                
+                // Checkout backend
+                checkout scm
+                
+                // Checkout frontend into subdirectory
+                dir('frontend-temp') {
+                    git branch: 'main', 
+                        url: "${FRONTEND_REPO}"
                 }
             }
         }
