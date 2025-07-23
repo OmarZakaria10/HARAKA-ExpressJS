@@ -2,115 +2,123 @@ pipeline {
     agent any
     
     tools {
-        nodejs 'Node' // References the Node.js version configured in Global Tool Configuration
+        nodejs 'Node'
     }
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKER_IMAGE = 'omarzakaria10/haraka'
         FRONTEND_REPO = 'https://github.com/OmarZakaria10/HARAKA-ReactJS.git'
-        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
         NODE_ENV = 'production'
+        // Enable BuildKit for faster Docker builds
+        DOCKER_BUILDKIT = '1'
+    }
+    
+    options {
+        // Keep builds for history but limit to save space
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        // Timeout the build after 30 minutes
+        timeout(time: 30, unit: 'MINUTES')
+        // Skip default checkout - we'll do it explicitly
+        skipDefaultCheckout(true)
     }
     
     stages {
-        stage('Cleanup Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
-        
-        stage('Checkout Backend') {
-            steps {
-                checkout scm
-            }
-        }
-        
-        stage('Checkout Frontend') {
-            steps {
-                dir('frontend-temp') {
-                    git branch: 'main', 
-                        credentialsId: 'github-credentials', 
-                        url: "${FRONTEND_REPO}"
+        stage('Checkout & Setup') {
+            parallel {
+                stage('Checkout Backend') {
+                    steps {
+                        // Clean workspace and checkout
+                        cleanWs()
+                        checkout scm
+                    }
+                }
+                stage('Checkout Frontend') {
+                    steps {
+                        dir('frontend-temp') {
+                            git branch: 'main', 
+                                credentialsId: 'github-credentials', 
+                                url: "${FRONTEND_REPO}"
+                        }
+                    }
                 }
             }
         }
         
-        stage('Install Backend Dependencies') {
-            steps {
-                sh 'npm ci --only=production'
-            }
-        }
-        
-        stage('Build Frontend') {
-            steps {
-                dir('frontend-temp') {
-                    sh 'npm ci'
-                    sh 'CI=false npm run build'
+        stage('Build & Prepare') {
+            parallel {
+                stage('Install Backend Dependencies') {
+                    steps {
+                        // Use npm ci with cache for faster installs
+                        sh '''
+                            npm ci --only=production --cache .npm-cache --prefer-offline
+                        '''
+                    }
+                }
+                stage('Build Frontend') {
+                    steps {
+                        dir('frontend-temp') {
+                            sh '''
+                                # Use npm cache and skip integrity checks for speed
+                                npm ci --cache ../.npm-cache --prefer-offline
+                                CI=false npm run build
+                            '''
+                        }
+                    }
                 }
             }
         }
         
-        stage('Copy Frontend Build to Backend') {
-            steps {
-                // Clean existing build directory
-                sh 'rm -rf build'
-                // Copy new build
-                sh 'cp -r frontend-temp/build .'
-                // Verify build was copied
-                sh 'ls -la build/'
-            }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                // Add your test commands here
-                echo 'Running tests...'
-                // sh 'npm test'
-            }
-        }
-        
-        stage('Docker Environment Check') {
+        stage('Prepare Application') {
             steps {
                 script {
-                    echo '🔍 Checking Docker environment...'
-                    sh 'docker --version'
-                    sh 'docker info'
+                    // Copy frontend build efficiently
+                    sh '''
+                        rm -rf build
+                        cp -r frontend-temp/build .
+                        echo "✅ Frontend build copied ($(du -sh build | cut -f1))"
+                    '''
                     
-                    // Test Docker Hub connectivity
-                    echo '🔍 Testing Docker Hub connectivity...'
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker logout'
-                    
-                    echo '✅ Docker environment check passed'
+                    // Quick verification
+                    if (!fileExists('build/index.html')) {
+                        error('Frontend build verification failed!')
+                    }
                 }
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Build & Push Docker Image') {
+            when {
+                anyOf {
+                    branch 'main'
+                    changeRequest()
+                }
+            }
             steps {
                 script {
-                    def imageTag = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    def imageTag = "${DOCKER_IMAGE}:${IMAGE_TAG}"
                     def latestTag = "${DOCKER_IMAGE}:latest"
                     
-                    // Login to Docker Hub before building to avoid rate limits
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    
-                    // Build with better error handling
-                    sh "docker build -t ${imageTag} ."
-                    sh "docker tag ${imageTag} ${latestTag}"
-                    
-                    echo "✅ Built image: ${imageTag}"
-                }
-            }
-        }
-        
-        stage('Push to DockerHub') {
-            steps {
-                script {
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_IMAGE}:latest"
+                    // Single Docker login for entire build process
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                     usernameVariable: 'DOCKER_USER', 
+                                                     passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            echo "🔑 Logging into DockerHub..."
+                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                            
+                            echo "🔨 Building Docker image with BuildKit..."
+                            docker build --progress=plain -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
+                            docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
+                            
+                            echo "📤 Pushing images to DockerHub..."
+                            docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+                            docker push ${DOCKER_IMAGE}:latest
+                            
+                            echo "✅ Images pushed successfully"
+                        '''
+                    }
                 }
             }
         }
@@ -120,35 +128,47 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo 'Deploying to production...'
+                echo "🚀 Deploying to production environment..."
                 // Add your deployment commands here
-                // For example, update a Kubernetes deployment or restart a service
+                // sh './deploy.sh production'
             }
         }
     }
     
     post {
         always {
-            // Cleanup
-            sh 'docker logout || true'
-            sh 'rm -rf frontend-temp || true'
-            
-            // Clean up Docker images to save space
-            sh """
-                docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
-                docker rmi ${DOCKER_IMAGE}:latest || true
-                docker system prune -f || true
-            """
+            script {
+                // Cleanup with minimal impact
+                sh '''
+                    # Only logout if logged in
+                    docker logout || true
+                    
+                    # Clean only current build images to save space
+                    docker rmi ${DOCKER_IMAGE}:${IMAGE_TAG} || true
+                    
+                    # Remove frontend temp directory
+                    rm -rf frontend-temp || true
+                    
+                    # Light cleanup - only remove dangling images
+                    docker image prune -f || true
+                '''
+            }
         }
         
         success {
-            echo 'Pipeline completed successfully!'
-            // You can add notifications here (Slack, email, etc.)
+            echo '✅ Pipeline completed successfully!'
+            // Add notifications here if needed
+            // slackSend(channel: '#deployments', message: "✅ HARAKA ${IMAGE_TAG} deployed successfully!")
         }
         
         failure {
-            echo 'Pipeline failed!'
-            // You can add failure notifications here
+            echo '❌ Pipeline failed!'
+            // Add failure notifications here
+            // slackSend(channel: '#deployments', message: "❌ HARAKA ${IMAGE_TAG} build failed!")
+        }
+        
+        unstable {
+            echo '⚠️ Pipeline completed with warnings'
         }
     }
 }
