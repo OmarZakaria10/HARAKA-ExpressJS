@@ -38,7 +38,6 @@ pipeline {
                     steps {
                         dir('frontend-temp') {
                             git branch: 'main', 
-                                credentialsId: 'github-credentials', 
                                 url: "${FRONTEND_REPO}"
                         }
                     }
