@@ -22,7 +22,7 @@ RUN npm ci --only=production && npm cache clean --force
 COPY . .
 
 # Verify build directory exists (it should be copied by Jenkins pipeline)
-RUN ls -la build/ || (echo "❌ Build directory not found!" && exit 1)
+RUN ls -la build/ 
 
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
