@@ -1,5 +1,5 @@
 # Use Node.js LTS version with Alpine for smaller image size
-FROM node:24-alpine3.21
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -21,8 +21,8 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application code
 COPY . .
 
-# Copy the built frontend (this will be available from Jenkins pipeline)
-COPY build ./build
+# Verify build directory exists (it should be copied by Jenkins pipeline)
+RUN ls -la build/ || (echo "❌ Build directory not found!" && exit 1)
 
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app

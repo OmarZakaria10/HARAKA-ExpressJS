@@ -70,14 +70,37 @@ pipeline {
             }
         }
         
+        stage('Docker Environment Check') {
+            steps {
+                script {
+                    echo '🔍 Checking Docker environment...'
+                    sh 'docker --version'
+                    sh 'docker info'
+                    
+                    // Test Docker Hub connectivity
+                    echo '🔍 Testing Docker Hub connectivity...'
+                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                    sh 'docker logout'
+                    
+                    echo '✅ Docker environment check passed'
+                }
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 script {
                     def imageTag = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
                     def latestTag = "${DOCKER_IMAGE}:latest"
                     
+                    // Login to Docker Hub before building to avoid rate limits
+                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                    
+                    // Build with better error handling
                     sh "docker build -t ${imageTag} ."
                     sh "docker tag ${imageTag} ${latestTag}"
+                    
+                    echo "✅ Built image: ${imageTag}"
                 }
             }
         }
