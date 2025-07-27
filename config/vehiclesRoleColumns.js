@@ -21,9 +21,9 @@ const vehiclesRoleColumns = {
     "insurance_status",
     "notes",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
   ],
-    admin: [
+  admin: [
     "id",
     "code",
     "chassis_number",
@@ -45,9 +45,9 @@ const vehiclesRoleColumns = {
     "insurance_status",
     "notes",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
   ],
-    viewer: [
+  viewer: [
     "id",
     "code",
     "chassis_number",
@@ -69,7 +69,7 @@ const vehiclesRoleColumns = {
     "insurance_status",
     "notes",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
   ],
   GPS: [
     "id",
@@ -93,7 +93,7 @@ const vehiclesRoleColumns = {
     // "insurance_status",
     "notes",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
   ],
   license: [
     "id",
@@ -117,7 +117,7 @@ const vehiclesRoleColumns = {
     // "insurance_status",
     "notes",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
   ],
 };
 

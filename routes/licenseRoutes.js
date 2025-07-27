@@ -1,11 +1,11 @@
 const express = require("express");
 const licenseController = require("../controllers/licenseController");
 const validatedLicense = require("../middlewares/validateLicense");
-const authController = require('../controllers/authController');
+const authController = require("../controllers/authController");
 const router = express.Router();
 
 router.use(authController.protect); // Protect all routes after this middleware
-router.use(authController.restrictTo('admin','user','license','viewer')); // Restrict all routes 
+router.use(authController.restrictTo("admin", "user", "license", "viewer")); // Restrict all routes
 router.get("/getLicenseById", licenseController.getLicenseById);
 // Get all licenses
 router.get("/getAllLicenses", licenseController.getAllLicenses);
@@ -21,7 +21,7 @@ router.get("/getUniqueFieldValues", licenseController.getUniqueFieldValues);
 // Get expiring licenses
 router.get("/getExpiringLicenses", licenseController.getExpiringLicensesBefore);
 
-router.use(authController.restrictTo('admin','user','license',)); // Restrict all routes 
+router.use(authController.restrictTo("admin", "user", "license")); // Restrict all routes
 router.post(
   "/createLicense",
   validatedLicense.validateLicenseData,

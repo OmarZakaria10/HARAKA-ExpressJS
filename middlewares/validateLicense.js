@@ -11,7 +11,7 @@ exports.validateLicenseData = catchAsync(async (req, res, next) => {
   const requiredFields = [
     "plate_number",
     "license_type",
-    "chassis_number", 
+    "chassis_number",
     "license_start_date",
     "license_end_date",
   ];
@@ -45,25 +45,32 @@ exports.validateLicenseData = catchAsync(async (req, res, next) => {
         [Op.or]: [
           { plate_number: licenseData.plate_number },
           { chassis_number: licenseData.chassis_number },
-          { vehicleId: licenseData.vehicleId }
-        ]
-      }
+          { vehicleId: licenseData.vehicleId },
+        ],
+      },
     });
 
     if (existingLicense) {
-      return next(new AppError("A license already exists for this vehicle/plate number/chassis number", 400));
+      return next(
+        new AppError(
+          "A license already exists for this vehicle/plate number/chassis number",
+          400
+        )
+      );
     }
   } else {
     // 5. If no vehicleId provided, try to find matching vehicle by chassis number
     const vehicle = await Vehicle.findOne({
       where: {
         chassis_number: {
-          [Op.iLike]: `%${licenseData.chassis_number}`
-        }
-      }
+          [Op.iLike]: `%${licenseData.chassis_number}`,
+        },
+      },
     });
     licenseData.vehicleId = vehicle ? vehicle.id : null;
-    licenseData.chassis_number = vehicle ? vehicle.chassis_number : licenseData.chassis_number;
+    licenseData.chassis_number = vehicle
+      ? vehicle.chassis_number
+      : licenseData.chassis_number;
   }
   req.validatedLicense = licenseData;
   next();

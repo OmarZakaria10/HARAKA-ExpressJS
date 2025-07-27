@@ -34,7 +34,6 @@ exports.createMilitaryLicense = catchAsync(async (req, res) => {
       vehicle.plate_number_gesh = militaryLicenseData.plate_number_gesh;
       await vehicle.save();
     }
-
   }
   const newMilitaryLicense = await MilitaryLicense.create(militaryLicenseData);
 
@@ -64,7 +63,7 @@ exports.updateMilitaryLicense = catchAsync(async (req, res) => {
       console.log("Vehicle found:", vehicle);
       await vehicle.save();
     }
-  }else {
+  } else {
     const vehicle = await Vehicle.findByPk(militaryLicenseData.vehicleId);
     if (!vehicle) {
       return res.status(404).json({
@@ -76,11 +75,14 @@ exports.updateMilitaryLicense = catchAsync(async (req, res) => {
     vehicle.plate_number_gesh = militaryLicenseData.plate_number_gesh;
     await vehicle.save();
   }
-  const updatedMilitaryLicense = await MilitaryLicense.update(militaryLicenseData, {
-    where: {
-      id,
-    },
-  });
+  const updatedMilitaryLicense = await MilitaryLicense.update(
+    militaryLicenseData,
+    {
+      where: {
+        id,
+      },
+    }
+  );
 
   res.status(200).json({
     status: "success",
@@ -131,13 +133,14 @@ exports.getMilitaryLicenseByChassisNumber = catchAsync(async (req, res) => {
       },
     },
     order: [["createdAt", "ASC"]],
-  });})
+  });
+});
 
-  exports.getMilitaryLicenseByVehicleId = catchAsync(async (req, res) => {
+exports.getMilitaryLicenseByVehicleId = catchAsync(async (req, res) => {
   const { vehicleId } = req.params;
   const militaryLicense = await MilitaryLicense.findOne({
     where: {
-      vehicleId: vehicleId
+      vehicleId: vehicleId,
     },
     order: [["createdAt", "ASC"]],
   });

@@ -1,18 +1,24 @@
 const express = require("express");
 const militaryLicenseController = require("../controllers/MilitaryLicenseController");
-const authController = require('../controllers/authController');
+const authController = require("../controllers/authController");
 const router = express.Router();
 
-router.use(authController.protect); 
-router.use(authController.restrictTo('admin','user','viewer'));
-router.get("/getAllMilitaryLicenses", militaryLicenseController.getAllMilitaryLicenses);
+router.use(authController.protect);
+router.use(authController.restrictTo("admin", "user", "viewer"));
+router.get(
+  "/getAllMilitaryLicenses",
+  militaryLicenseController.getAllMilitaryLicenses
+);
 
 router.post(
   "/createMilitaryLicense",
   militaryLicenseController.createMilitaryLicense
 );
 
-router.get("/getUniqueFieldValues", militaryLicenseController.getUniqueMilitaryFieldValues);
+router.get(
+  "/getUniqueFieldValues",
+  militaryLicenseController.getUniqueMilitaryFieldValues
+);
 
 router
   .route("/:id")
