@@ -1,5 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
+const helmet = require("helmet");
+const xss = require("xss-clean");
 const userRouter = require("./routes/userRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const licenseRoutes = require("./routes/licenseRoutes");
@@ -11,6 +13,14 @@ const cors = require("cors");
 
 const app = express();
 
+// 🔒 SECURITY MIDDLEWARE (Must be first!)
+// 1. Security headers
+app.use(helmet());
+
+// 2. Cross-site scripting (XSS) protection
+app.use(xss());
+
+// 3. Development logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -26,8 +36,15 @@ app.use((req, res, next) => {
 });
 app.use(
   cors({
-    origin: true, // Reflects the request origin
+    origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+      "http://localhost:3000",
+      // "http://localhost:3001",
+      // "https://your-frontend-domain.com",
+    ],
     credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
   })
 );
 app.use("/users", userRouter);
