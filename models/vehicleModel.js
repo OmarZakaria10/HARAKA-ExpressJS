@@ -85,6 +85,18 @@ class Vehicle extends Model {
         insurance_status: {
           type: DataTypes.STRING,
         },
+        insurance_policy: {
+          type: DataTypes.STRING,
+        },
+        customs_clearance: {
+          type: DataTypes.STRING,
+        },
+        insurance_document: {
+          type: DataTypes.STRING,
+        },
+        license_status: {
+          type: DataTypes.STRING,
+        },
         notes: {
           type: DataTypes.JSON,
           allowNull: true,
@@ -113,6 +125,12 @@ class Vehicle extends Model {
           },
           {
             fields: ["administration"],
+          },
+          {
+            fields: ["license_status"],
+          },
+          {
+            fields: ["insurance_status"],
           },
         ],
       }
