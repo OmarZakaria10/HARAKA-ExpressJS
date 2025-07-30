@@ -31,7 +31,9 @@ exports.createMilitaryLicense = catchAsync(async (req, res) => {
     if (vehicle) {
       militaryLicenseData.vehicleId = vehicle.id;
       militaryLicenseData.chassis_number = vehicle.chassis_number;
-      vehicle.plate_number_gesh = militaryLicenseData.plate_number_gesh;
+      if (vehicle.plate_number_gesh === null) {
+        vehicle.plate_number_gesh = militaryLicenseData.plate_number_gesh;
+      }
       await vehicle.save();
     }
   }
