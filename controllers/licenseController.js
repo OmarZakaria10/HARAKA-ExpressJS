@@ -50,18 +50,41 @@ exports.getAllLicenses = catchAsync(async (req, res) => {
 
 exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
   const licenses = await License.findAll({
+    attributes: ["plate_number"],
     include: [
       {
         model: Vehicle,
         as: "vehicle",
+        attributes: [
+          "code",
+          "chassis_number",
+          "vehicle_type",
+          "vehicle_equipment",
+          "fuel_type",
+          "model_year",
+        ],
       },
     ],
-    order: [["createdAt", "ASC"]],
+    order: [[{ model: Vehicle, as: "vehicle" }, "createdAt", "ASC"]],
+    raw: false,
   });
+
+  // Transform the data to match the SQL query structure
+  const results = licenses.map((license) => ({
+    code: license.vehicle.code,
+    chassis_number: license.vehicle.chassis_number,
+    vehicle_type: license.vehicle.vehicle_type,
+    vehicle_equipment: license.vehicle.vehicle_equipment,
+    plate_number: license.plate_number,
+    fuel_type: license.vehicle.fuel_type,
+    model_year: license.vehicle.model_year,
+  }));
+
   res.status(200).json({
     status: "success",
+    results: results.length,
     data: {
-      licenses,
+      licenses: results,
     },
   });
 });
