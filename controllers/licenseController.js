@@ -63,6 +63,7 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
           "fuel_type",
           "model_year",
         ],
+        required: true, // This ensures INNER JOIN behavior like your SQL query
       },
     ],
     order: [[{ model: Vehicle, as: "vehicle" }, "createdAt", "ASC"]],
@@ -71,13 +72,13 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
 
   // Transform the data to match the SQL query structure
   const results = licenses.map((license) => ({
-    code: license.vehicle.code,
-    chassis_number: license.vehicle.chassis_number,
-    vehicle_type: license.vehicle.vehicle_type,
-    vehicle_equipment: license.vehicle.vehicle_equipment,
-    plate_number: license.plate_number,
-    fuel_type: license.vehicle.fuel_type,
-    model_year: license.vehicle.model_year,
+    code: license.vehicle?.code || null,
+    chassis_number: license.vehicle?.chassis_number || null,
+    vehicle_type: license.vehicle?.vehicle_type || null,
+    vehicle_equipment: license.vehicle?.vehicle_equipment || null,
+    plate_number: license.plate_number || null,
+    fuel_type: license.vehicle?.fuel_type || null,
+    model_year: license.vehicle?.model_year || null,
   }));
 
   res.status(200).json({
