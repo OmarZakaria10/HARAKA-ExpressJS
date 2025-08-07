@@ -23,7 +23,6 @@ pipeline {
         // Docker configuration
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKER_IMAGE = 'omarzakaria10/haraka'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
         
         // Application configuration
         NODE_ENV = 'production'
@@ -140,8 +139,8 @@ pipeline {
                     echo "🔍 Build number: ${env.BUILD_NUMBER}"
                     echo "🔍 Git branch: ${env.GIT_BRANCH}"
                     
-                    def imageTag = "${DOCKER_IMAGE}:${IMAGE_TAG}"
-                    def latestTag = "${DOCKER_IMAGE}:latest"
+                    // Only using latest tag for simpler deployment
+                    def imageTag = "${DOCKER_IMAGE}:latest"
                     
                     // Single Docker login for entire build process
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
@@ -152,14 +151,12 @@ pipeline {
                             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                             
                             echo "🔨 Building Docker image with BuildKit..."
-                            docker build --progress=plain -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
-                            docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
+                            docker build --progress=plain -t ${DOCKER_IMAGE}:latest .
                             
-                            echo "📤 Pushing images to DockerHub..."
-                            docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
-                            docker push ${DOCKER_IMAGE}:latest
+                            echo "📤 Pushing image to DockerHub with verbose output..."
+                            docker push --verbose ${DOCKER_IMAGE}:latest
                             
-                            echo "✅ Images pushed successfully"
+                            echo "✅ Image pushed successfully"
                         '''
                     }
                 }
@@ -193,9 +190,6 @@ pipeline {
                     # Safely logout from DockerHub
                     docker logout || true
                     
-                    # Remove only the specific images we just built to save space
-                    docker rmi ${DOCKER_IMAGE}:${IMAGE_TAG} || true
-                    
                     # Clean up temporary frontend directory
                     rm -rf frontend-temp || true
                     
@@ -208,13 +202,13 @@ pipeline {
         success {
             echo '✅ Pipeline completed successfully!'
             // Future: Add notifications when moving to cloud
-            // slackSend(channel: '#deployments', message: "✅ HARAKA ${IMAGE_TAG} deployed successfully!")
+            // slackSend(channel: '#deployments', message: "✅ HARAKA latest deployed successfully!")
         }
         
         failure {
             echo '❌ Pipeline failed! Check the logs above for details.'
             // Future: Add failure notifications when moving to cloud
-            // slackSend(channel: '#deployments', message: "❌ HARAKA build ${IMAGE_TAG} failed!")
+            // slackSend(channel: '#deployments', message: "❌ HARAKA build failed!")
         }
         
         unstable {
