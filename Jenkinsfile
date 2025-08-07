@@ -1,37 +1,86 @@
+// ===================================================================
+// HARAKA CI/CD Pipeline - Simplified for Local & Cloud Jenkins
+// ===================================================================
+// This pipeline builds a full-stack app (Express.js + React) 
+// and deploys it as a Docker container to DockerHub
+// 
+// Requirements:
+// - Jenkins with Docker capability
+// - NodeJS tool configured in Jenkins
+// - DockerHub credentials stored as 'dockerhub-credentials'
+// ===================================================================
+
 pipeline {
     agent any
     
+    // Tools required for the build - works on both local and cloud Jenkins
     tools {
-        nodejs 'Node'
+        nodejs 'Node' // Ensure this matches your Jenkins NodeJS tool name
     }
     
+    // Environment variables - easily configurable for different environments
     environment {
+        // Docker configuration
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKER_IMAGE = 'omarzakaria10/haraka'
-        FRONTEND_REPO = 'https://github.com/OmarZakaria10/HARAKA-ReactJS.git'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
+        
+        // Application configuration
         NODE_ENV = 'production'
-        // Enable BuildKit for faster Docker builds
+        FRONTEND_REPO = 'https://github.com/OmarZakaria10/HARAKA-ReactJS.git'
+        
+        // Build optimization - faster Docker builds
         DOCKER_BUILDKIT = '1'
     }
     
+    // Pipeline options - suitable for local Jenkins with limited resources
     options {
-        // Keep builds for history but limit to save space
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        // Timeout the build after 30 minutes
-        timeout(time: 30, unit: 'MINUTES')
-        // Skip default checkout - we'll do it explicitly
+        // Prevent workspace pollution on local machine
         skipDefaultCheckout(true)
+        
+        // Prevent hanging builds - important for local setups
+        timeout(time: 20, unit: 'MINUTES')
+        
+        // Keep only recent builds to save disk space
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    
+    // Build triggers - only for main branch changes
+    triggers {
+        // Poll SCM every 15 minutes for changes (can be disabled for manual-only builds)
+        pollSCM('H/15 * * * *')
     }
     
     stages {
-        stage('Checkout & Setup') {
+        stage('Branch Check & Setup') {
             steps {
-                // Clean workspace first
-                cleanWs()
-                
-                // Checkout backend
-                checkout scm
+                script {
+                    // Clean workspace first
+                    cleanWs()
+                    
+                    // Checkout backend and get branch info
+                    def scmVars = checkout scm
+                    env.GIT_BRANCH = scmVars.GIT_BRANCH
+                    env.BRANCH_NAME = scmVars.GIT_BRANCH.replaceAll('origin/', '')
+                    
+                    // Check if build should proceed
+                    def isManualBuild = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').size() > 0
+                    def isMainBranch = env.BRANCH_NAME == 'main'
+                    
+                    echo "🔍 Detected branch: ${env.BRANCH_NAME}"
+                    echo "🔍 Is manual build: ${isManualBuild}"
+                    echo "🔍 Is main branch: ${isMainBranch}"
+                    
+                    if (!isMainBranch && !isManualBuild) {
+                        error("❌ Build skipped: Only main branch or manual builds are allowed. Current branch: ${env.BRANCH_NAME}")
+                    }
+                    
+                    if (isManualBuild) {
+                        echo "✅ Manual build detected - proceeding with build"
+                    } else if (isMainBranch) {
+                        echo "✅ Main branch detected - proceeding with build"
+                    }
+                }
                 
                 // Checkout frontend into subdirectory
                 dir('frontend-temp') {
@@ -119,31 +168,38 @@ pipeline {
         
         stage('Deploy') {
             when {
-                branch 'main'
+                // Only deploy on main branch builds (manual or automatic)
+                anyOf {
+                    branch 'main'
+                    // Allow manual builds to deploy regardless of branch
+                    triggeredBy 'UserIdCause'
+                }
             }
             steps {
                 echo "🚀 Deploying to production environment..."
-                // Add your deployment commands here
-                // sh './deploy.sh production'
+                // Add your deployment commands here when ready
+                // Example: sh './deploy.sh production'
+                // Example: sh 'docker-compose -f docker-compose.prod.yml up -d'
             }
         }
     }
     
+    // Post-build actions - optimized for local Jenkins resource management
     post {
         always {
             script {
-                // Cleanup with minimal impact
+                // Lightweight cleanup to prevent local machine from running out of space
                 sh '''
-                    # Only logout if logged in
+                    # Safely logout from DockerHub
                     docker logout || true
                     
-                    # Clean only current build images to save space
+                    # Remove only the specific images we just built to save space
                     docker rmi ${DOCKER_IMAGE}:${IMAGE_TAG} || true
                     
-                    # Remove frontend temp directory
+                    # Clean up temporary frontend directory
                     rm -rf frontend-temp || true
                     
-                    # Light cleanup - only remove dangling images
+                    # Remove unused Docker images (but be gentle for local setups)
                     docker image prune -f || true
                 '''
             }
@@ -151,18 +207,18 @@ pipeline {
         
         success {
             echo '✅ Pipeline completed successfully!'
-            // Add notifications here if needed
+            // Future: Add notifications when moving to cloud
             // slackSend(channel: '#deployments', message: "✅ HARAKA ${IMAGE_TAG} deployed successfully!")
         }
         
         failure {
-            echo '❌ Pipeline failed!'
-            // Add failure notifications here
-            // slackSend(channel: '#deployments', message: "❌ HARAKA ${IMAGE_TAG} build failed!")
+            echo '❌ Pipeline failed! Check the logs above for details.'
+            // Future: Add failure notifications when moving to cloud
+            // slackSend(channel: '#deployments', message: "❌ HARAKA build ${IMAGE_TAG} failed!")
         }
         
         unstable {
-            echo '⚠️ Pipeline completed with warnings'
+            echo '⚠️ Pipeline completed with warnings - check the build logs'
         }
     }
 }
