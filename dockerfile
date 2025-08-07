@@ -1,33 +1,18 @@
-# Use stable Node.js LTS Alpine (much smaller and more reliable)
-FROM node:20-alpine
+# Use stable Node.js LTS Alpine 
+FROM node:24-alpine3.21
 
 # Set working directory and environment
 WORKDIR /app
-ENV NODE_ENV=production PORT=4000
+ENV NODE_ENV=production 
 
-# Create non-root user efficiently
-RUN addgroup -g 1001 -S app && adduser -S app -u 1001 -G app
+COPY package*.json ./
 
-# Change ownership of the app directory early (when it's empty)
-RUN chown app:app /app
+RUN npm ci --only=production && addgroup -S app && adduser -S app -G app && chown -R app:app .
 
-# Switch to non-root user before copying files (avoids chown later)
 USER app
 
-# Copy package files first (for better Docker layer caching)
-COPY --chown=app:app package*.json ./
+COPY . .
 
-# Install only production dependencies and clean cache in one layer
-RUN npm ci --only=production && \
-    npm cache clean --force
-
-# Copy application code with correct ownership
-COPY --chown=app:app . .
-
-# Verify build directory exists (required for frontend)
-RUN ls -la build/ || (echo "❌ Build directory missing!" && exit 1)
-
-# Expose port
 EXPOSE 4000
 
 # Health check
