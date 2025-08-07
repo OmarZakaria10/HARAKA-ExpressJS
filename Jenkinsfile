@@ -84,14 +84,13 @@ pipeline {
         }
         
         stage('Build & Push Docker Image') {
-            when {
-                anyOf {
-                    branch 'main'
-                    changeRequest()
-                }
-            }
             steps {
                 script {
+                    // Debug branch information
+                    echo "🔍 Current branch: ${env.BRANCH_NAME}"
+                    echo "🔍 Build number: ${env.BUILD_NUMBER}"
+                    echo "🔍 Git branch: ${env.GIT_BRANCH}"
+                    
                     def imageTag = "${DOCKER_IMAGE}:${IMAGE_TAG}"
                     def latestTag = "${DOCKER_IMAGE}:latest"
                     
