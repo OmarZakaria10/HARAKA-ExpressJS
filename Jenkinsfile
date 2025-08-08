@@ -153,8 +153,8 @@ pipeline {
                             echo "🔨 Building Docker image with BuildKit..."
                             docker build --progress=plain -t ${DOCKER_IMAGE}:latest .
                             
-                            echo "📤 Pushing image to DockerHub with verbose output..."
-                            docker push --verbose ${DOCKER_IMAGE}:latest
+                            echo "📤 Pushing image to DockerHub"
+                            docker push ${DOCKER_IMAGE}:latest
                             
                             echo "✅ Image pushed successfully"
                         '''
