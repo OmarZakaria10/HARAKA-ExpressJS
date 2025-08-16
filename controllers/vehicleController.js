@@ -353,6 +353,7 @@ exports.updateInsuranceStatus = catchAsync(async (req, res) => {
     "لن يتم التأمين عليها",
     "سيتم التأمين عليها",
     "تمت معاينتها",
+    "تم الإستبعاد من التأمين",
   ];
 
   if (!ValidInsuranceStatus.includes(insurance_status)) {
