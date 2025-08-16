@@ -328,3 +328,71 @@ exports.getVehiclesByAdministration = catchAsync(async (req, res) => {
     },
   });
 });
+
+exports.updateInsuranceStatus = catchAsync(async (req, res) => {
+  const { vehicles, insurance_status } = req.body;
+
+  // Validate required fields
+  if (!vehicles || !insurance_status) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Both vehicles and insurance_status are required",
+    });
+  }
+
+  // Validate vehicles is an array
+  if (!Array.isArray(vehicles) || vehicles.length === 0) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Vehicles must be a non-empty array",
+    });
+  }
+
+  const ValidInsuranceStatus = [
+    "تم التأمين عليها",
+    "لن يتم التأمين عليها",
+    "سيتم التأمين عليها",
+    "تمت معاينتها",
+    "تم الإستبعاد من التأمين",
+  ];
+
+  if (!ValidInsuranceStatus.includes(insurance_status)) {
+    return res.status(400).json({
+      status: "fail",
+      message:
+        "Insurance status must be one of the following: " +
+        ValidInsuranceStatus.join(", "),
+    });
+  }
+
+  // Check if vehicles exist before updating
+  const existingVehicles = await Vehicle.findAll({
+    where: { id: vehicles },
+    attributes: ["id"],
+  });
+
+  if (existingVehicles.length !== vehicles.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Some vehicles were not found",
+    });
+  }
+
+  const [affectedRows] = await Vehicle.update(
+    { insurance_status },
+    {
+      where: {
+        id: vehicles,
+      },
+    }
+  );
+
+  res.status(200).json({
+    status: "success",
+    message: `Insurance status updated successfully for ${affectedRows} vehicles`,
+    data: {
+      updatedVehicles: affectedRows,
+      insurance_status,
+    },
+  });
+});

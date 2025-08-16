@@ -56,6 +56,7 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
         model: Vehicle,
         as: "vehicle",
         attributes: [
+          "id",
           "code",
           "chassis_number",
           "vehicle_type",
@@ -73,6 +74,7 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
 
   // Transform the data to match the SQL query structure
   const results = licenses.map((license) => ({
+    id: license.vehicle?.id || null,
     code: license.vehicle?.code || null,
     chassis_number: license.vehicle?.chassis_number || null,
     vehicle_type: license.vehicle?.vehicle_type || null,
@@ -80,6 +82,7 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
     plate_number: license.plate_number || null,
     fuel_type: license.vehicle?.fuel_type || null,
     model_year: license.vehicle?.model_year || null,
+    insurance_status: license.vehicle?.insurance_status || null,
   }));
 
   res.status(200).json({

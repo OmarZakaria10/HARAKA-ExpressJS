@@ -2,12 +2,10 @@ const express = require("express");
 const vehicleController = require("../controllers/vehicleController");
 const authController = require("../controllers/authController");
 const router = express.Router();
-const Vehicle = require("../models/vehicleModel");
 
 router.use(authController.protect); // Protect all routes after this middleware
 router.get("/getAllVehicles", vehicleController.getAllVehicles);
 router.get("/getUniqueFieldValues", vehicleController.getUniqueFieldValues);
-router.get("/getFilteredVehicles", vehicleController.getFilteredVehicles);
 router.get("/getVehicle/:id", vehicleController.getVehicleById);
 router.use(authController.restrictTo("admin", "user", "GPS", "viewer")); // Restrict all routes to admin, user, vehicle, and viewer roles
 
@@ -21,10 +19,12 @@ router.get(
 );
 
 router.use(authController.restrictTo("admin", "user", "GPS"));
-router.post("/createVehicle", vehicleController.createVehicle);
 router.patch("/updateVehicle/:id", vehicleController.updateVehicle);
+router.get("/getFilteredVehicles", vehicleController.getFilteredVehicles);
 
 router.use(authController.restrictTo("admin", "user"));
+router.post("/createVehicle", vehicleController.createVehicle);
 router.delete("/deleteVehicle/:id", vehicleController.deleteVehicle);
+router.put("/updateInsuranceStatus", vehicleController.updateInsuranceStatus);
 
 module.exports = router;
