@@ -15,13 +15,15 @@ const app = express();
 
 // 🔒 SECURITY MIDDLEWARE (Must be first!)
 // 1. Security headers - Configured for permissive cross-origin access
-app.use(helmet({
-  crossOriginOpenerPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: false, // Disable CSP for maximum compatibility
-  originAgentCluster: false,
-}));
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false, // Disable CSP for maximum compatibility
+    originAgentCluster: false,
+  })
+);
 
 // 2. Cross-site scripting (XSS) protection
 app.use(xss());
@@ -32,27 +34,42 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // 4. CORS - Allow all origins for maximum compatibility
-app.use(cors({
-  origin: true, // Allow any origin
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-requested-with", "Origin", "X-Requested-With", "Accept"],
-  exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"]
-}));
+app.use(
+  cors({
+    origin: true, // Allow any origin
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-requested-with",
+      "Origin",
+      "X-Requested-With",
+      "Accept",
+    ],
+    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
+  })
+);
 
 // 5. Additional CORS headers for maximum compatibility
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Cross-Origin-Opener-Policy', 'unsafe-none');
-  res.header('Cross-Origin-Embedder-Policy', 'unsafe-none');
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Cross-Origin-Opener-Policy", "unsafe-none");
+  res.header("Cross-Origin-Embedder-Policy", "unsafe-none");
+  res.header("Cross-Origin-Resource-Policy", "cross-origin");
+
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     res.sendStatus(200);
   } else {
     next();
