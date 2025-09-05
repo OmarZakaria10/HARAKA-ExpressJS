@@ -63,6 +63,8 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
           "vehicle_equipment",
           "fuel_type",
           "model_year",
+          "sector",
+          "administration",
           "insurance_status",
         ],
         required: true, // This ensures INNER JOIN behavior like your SQL query
@@ -82,6 +84,8 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
     plate_number: license.plate_number || null,
     fuel_type: license.vehicle?.fuel_type || null,
     model_year: license.vehicle?.model_year || null,
+    sector: license.vehicle?.sector || null,
+    administration: license.vehicle?.administration || null,
     insurance_status: license.vehicle?.insurance_status || null,
   }));
 
