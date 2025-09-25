@@ -33,48 +33,15 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// 4. CORS - Allow all origins for maximum compatibility
+// 4. CORS - Simple configuration for two origins
 app.use(
   cors({
-    origin: true, // Allow any origin
+    origin: ["http://localhost:3000", "https://haraka-asnt.onrender.com"],
     credentials: true,
-    optionsSuccessStatus: 200,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "x-requested-with",
-      "Origin",
-      "X-Requested-With",
-      "Accept",
-    ],
-    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// 5. Additional CORS headers for maximum compatibility
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Cross-Origin-Opener-Policy", "unsafe-none");
-  res.header("Cross-Origin-Embedder-Policy", "unsafe-none");
-  res.header("Cross-Origin-Resource-Policy", "cross-origin");
-
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
 
 app.use(express.json({ limit: "10kb" }));
 // Serving static files
