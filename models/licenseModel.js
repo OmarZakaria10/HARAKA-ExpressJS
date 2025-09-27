@@ -173,7 +173,13 @@ class License extends Model {
           [Op.lte]: thresholdDate,
         },
       },
-      include: [{ model: Vehicle, as: "vehicle" }],
+      include: [
+        {
+          model: Vehicle,
+          as: "vehicle",
+          attributes: ["sector", "administration"],
+        },
+      ],
       order: [["license_end_date", "ASC"]],
     });
   }
@@ -192,6 +198,17 @@ class License extends Model {
         {
           model: Vehicle,
           as: "vehicle",
+          attributes: [
+            "id",
+            "code",
+            "chassis_number",
+            "vehicle_type",
+            "plate_number_malaky",
+            "plate_number_gesh",
+            "plate_number_mokhabrat",
+            "sector",
+            "administration",
+          ],
         },
       ],
     });
