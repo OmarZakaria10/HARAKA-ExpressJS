@@ -14,6 +14,10 @@ router.get(
   vehicleController.getVehiclesBySector
 );
 router.get(
+  "/getVehiclesByPlateNumber",
+  vehicleController.getVehicleByPlateNumber
+);
+router.get(
   "/getVehiclesByAdminstration/:adminstration",
   vehicleController.getVehiclesByAdministration
 );

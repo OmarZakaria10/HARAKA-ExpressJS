@@ -396,3 +396,28 @@ exports.updateInsuranceStatus = catchAsync(async (req, res) => {
     },
   });
 });
+
+exports.getVehicleByPlateNumber = catchAsync(async (req, res) => {
+  const { plate_number_malaky } = req.body;
+  const vehicle = await Vehicle.findOne({
+    attributes: getRoleAttributes(req.user.role),
+    where: {
+      plate_number_malaky: {
+        [Op.iLike]: `%${plate_number_malaky}%`,
+      },
+    },
+  });
+
+  if (!vehicle) {
+    return res.status(404).json({
+      status: "fail",
+      message: "No vehicle found with this license number",
+    });
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      vehicle,
+    },
+  });
+});
