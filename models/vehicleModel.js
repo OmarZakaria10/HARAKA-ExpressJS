@@ -99,6 +99,18 @@ class Vehicle extends Model {
         },
         date_added_to_inventory: {
           type: DataTypes.DATE,
+          allowNull: true,
+          get() {
+            if (!this.getDataValue("date_added_to_inventory")) return null;
+            return new Date(this.getDataValue("date_added_to_inventory"))
+              .toISOString()
+              .split("T")[0];
+          },
+          set(value) {
+            if (!value)
+              return this.setDataValue("date_added_to_inventory", null);
+            this.setDataValue("date_added_to_inventory", new Date(value));
+          },
         },
         notes: {
           type: DataTypes.JSON,
