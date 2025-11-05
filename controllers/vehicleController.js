@@ -181,6 +181,12 @@ exports.createVehicle = catchAsync(async (req, res) => {
         ? null
         : parseInt(vehicleData.modelYear, 10);
   }
+  if (vehicleData.date_added_to_inventory) {
+    vehicleData.date_added_to_inventory = parseUserDate(
+      vehicleData.date_added_to_inventory
+    );
+  }
+
   const newVehicle = await Vehicle.create(vehicleData);
 
   // Fetch the created vehicle with role-based attributes
@@ -205,6 +211,11 @@ exports.updateVehicle = catchAsync(async (req, res) => {
       vehicleData.modelYear === "NULL"
         ? null
         : parseInt(vehicleData.modelYear, 10);
+  }
+  if (vehicleData.date_added_to_inventory) {
+    vehicleData.date_added_to_inventory = parseUserDate(
+      vehicleData.date_added_to_inventory
+    );
   }
   const [updated] = await Vehicle.update(vehicleData, {
     where: { id: req.params.id },
@@ -421,3 +432,9 @@ exports.getVehicleByPlateNumber = catchAsync(async (req, res) => {
     },
   });
 });
+
+// Helper function to parse Egyptian date format (DD-MM-YYYY)
+function parseUserDate(input) {
+  const [day, month, year] = input.split("-");
+  return new Date(`${year}-${month}-${day}`);
+}

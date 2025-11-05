@@ -4,6 +4,13 @@ const Vehicle = require("../models/vehicleModel");
 const AppError = require("../utils/appError");
 const { Op } = require("sequelize");
 const catchAsync = require("../utils/catchAsync");
+
+// Helper function to parse Egyptian date format (DD-MM-YYYY)
+function parseUserDate(input) {
+  const [day, month, year] = input.split("-");
+  return new Date(`${year}-${month}-${day}`);
+}
+
 exports.validateLicenseData = catchAsync(async (req, res, next) => {
   const licenseData = { ...req.body };
 
@@ -25,11 +32,15 @@ exports.validateLicenseData = catchAsync(async (req, res, next) => {
 
   // 2. Validate dates
   if (licenseData.license_start_date && licenseData.license_end_date) {
-    const startDate = new Date(licenseData.license_start_date);
-    const endDate = new Date(licenseData.license_end_date);
+    const startDate = parseUserDate(licenseData.license_start_date);
+    const endDate = parseUserDate(licenseData.license_end_date);
     if (startDate > endDate) {
       return next(new AppError("End date cannot be before start date", 400));
     }
+
+    // Convert to ISO format for database storage
+    licenseData.license_start_date = startDate;
+    licenseData.license_end_date = endDate;
   }
 
   // 3. If vehicleId is provided, validate vehicle exists
