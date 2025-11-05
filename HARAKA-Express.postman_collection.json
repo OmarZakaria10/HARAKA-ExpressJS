@@ -1,0 +1,857 @@
+{
+  "info": {
+    "name": "HARAKA Express API",
+    "description": "Complete API collection for HARAKA Express project - Vehicle and License Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "haraka-express"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"your-username\",\n  \"password\": \"your-password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            },
+            "description": "Login to get authentication token"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "logout"]
+            },
+            "description": "Logout from the system (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            },
+            "description": "Get currently authenticated user details"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication related endpoints"
+    },
+    {
+      "name": "Users (Admin Only)",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Get all users (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"passwordConfirm\": \"password123\",\n  \"role\": \"user\",\n  \"name\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Create a new user (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "User ID"
+                }
+              ]
+            },
+            "description": "Get a specific user by ID (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "User ID"
+                }
+              ]
+            },
+            "description": "Update a user (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "User ID"
+                }
+              ]
+            },
+            "description": "Delete a user (Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints (Admin only)"
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "Get All Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getAllVehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getAllVehicles"]
+            },
+            "description": "Get all vehicles in the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unique Field Values",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getUniqueFieldValues",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getUniqueFieldValues"]
+            },
+            "description": "Get unique values for vehicle fields (for filters)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vehicle by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getVehicle/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getVehicle", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Vehicle ID"
+                }
+              ]
+            },
+            "description": "Get a specific vehicle by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vehicles by Sector",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getVehiclesBySector/:sector",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getVehiclesBySector", ":sector"],
+              "variable": [
+                {
+                  "key": "sector",
+                  "value": "sector-name",
+                  "description": "Sector name"
+                }
+              ]
+            },
+            "description": "Get all vehicles in a specific sector"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vehicles by Plate Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getVehiclesByPlateNumber?plateNumber=ABC123",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getVehiclesByPlateNumber"],
+              "query": [
+                {
+                  "key": "plateNumber",
+                  "value": "ABC123",
+                  "description": "Vehicle plate number"
+                }
+              ]
+            },
+            "description": "Search vehicles by plate number"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vehicles by Administration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getVehiclesByAdminstration/:adminstration",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getVehiclesByAdminstration", ":adminstration"],
+              "variable": [
+                {
+                  "key": "adminstration",
+                  "value": "admin-name",
+                  "description": "Administration name"
+                }
+              ]
+            },
+            "description": "Get all vehicles in a specific administration"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Filtered Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/getFilteredVehicles?sector=sector1&type=car",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "getFilteredVehicles"],
+              "query": [
+                {
+                  "key": "sector",
+                  "value": "sector1",
+                  "description": "Filter by sector",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "car",
+                  "description": "Filter by vehicle type",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get vehicles with multiple filters (Admin, User, GPS roles)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNumber\": \"ABC123\",\n  \"type\": \"Sedan\",\n  \"model\": \"Toyota Camry\",\n  \"year\": 2022,\n  \"sector\": \"Sector A\",\n  \"administration\": \"Main Admin\",\n  \"chassisNumber\": \"1234567890ABCDEFG\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/createVehicle",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "createVehicle"]
+            },
+            "description": "Create a new vehicle (Admin, User roles only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Vehicle",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"Updated Model\",\n  \"year\": 2023\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/updateVehicle/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "updateVehicle", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Vehicle ID"
+                }
+              ]
+            },
+            "description": "Update a vehicle (Admin, User, GPS roles)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Insurance Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": 1,\n  \"insuranceStatus\": \"active\",\n  \"insuranceExpiryDate\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/updateInsuranceStatus",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "updateInsuranceStatus"]
+            },
+            "description": "Update vehicle insurance status (Admin, User roles only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Vehicle",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/deleteVehicle/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "deleteVehicle", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Vehicle ID"
+                }
+              ]
+            },
+            "description": "Delete a vehicle (Admin, User roles only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Vehicle management endpoints"
+    },
+    {
+      "name": "Licenses",
+      "item": [
+        {
+          "name": "Get All Licenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getAllLicenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getAllLicenses"]
+            },
+            "description": "Get all licenses in the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Get License by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getLicenseById?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getLicenseById"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "License ID"
+                }
+              ]
+            },
+            "description": "Get a specific license by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get License by Vehicle ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getLicenseByVehicleId/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getLicenseByVehicleId", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Vehicle ID"
+                }
+              ]
+            },
+            "description": "Get license associated with a specific vehicle"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expired Licenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getExpiredLicenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getExpiredLicenses"]
+            },
+            "description": "Get all expired licenses"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expiring Licenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getExpiringLicenses?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getExpiringLicenses"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30",
+                  "description": "Number of days before expiry"
+                }
+              ]
+            },
+            "description": "Get licenses expiring within specified days"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unique Field Values",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getUniqueFieldValues",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getUniqueFieldValues"]
+            },
+            "description": "Get unique values for license fields (for filters)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Licenses with Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/getAllLicensesWithVehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "getAllLicensesWithVehicles"]
+            },
+            "description": "Get all licenses with associated vehicle information"
+          },
+          "response": []
+        },
+        {
+          "name": "Create License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": 1,\n  \"licenseNumber\": \"LIC123456\",\n  \"issueDate\": \"2024-01-01\",\n  \"expiryDate\": \"2025-01-01\",\n  \"licenseType\": \"Regular\",\n  \"issuingAuthority\": \"Transport Department\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/licenses/createLicense",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "createLicense"]
+            },
+            "description": "Create a new license (Admin, User, License roles)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update License",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expiryDate\": \"2026-01-01\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/licenses/updateLicense/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "updateLicense", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "License ID"
+                }
+              ]
+            },
+            "description": "Update a license (Admin, User, License roles)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete License",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/licenses/deleteLicense/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["licenses", "deleteLicense", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "License ID"
+                }
+              ]
+            },
+            "description": "Delete a license (Admin, User, License roles)"
+          },
+          "response": []
+        }
+      ],
+      "description": "License management endpoints"
+    },
+    {
+      "name": "Military Licenses",
+      "item": [
+        {
+          "name": "Get All Military Licenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/getAllMilitaryLicenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", "getAllMilitaryLicenses"]
+            },
+            "description": "Get all military licenses"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unique Field Values",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/getUniqueFieldValues",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", "getUniqueFieldValues"]
+            },
+            "description": "Get unique values for military license fields (for filters)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Military License by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Military License ID"
+                }
+              ]
+            },
+            "description": "Get a specific military license by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Military License by Chassis Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/byChassisNumber/:chassis_number",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", "byChassisNumber", ":chassis_number"],
+              "variable": [
+                {
+                  "key": "chassis_number",
+                  "value": "1234567890ABCDEFG",
+                  "description": "Vehicle Chassis Number"
+                }
+              ]
+            },
+            "description": "Get military license by chassis number"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Military License by Vehicle ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/byVehicleId/:vehicleId",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", "byVehicleId", ":vehicleId"],
+              "variable": [
+                {
+                  "key": "vehicleId",
+                  "value": "1",
+                  "description": "Vehicle ID"
+                }
+              ]
+            },
+            "description": "Get military license by vehicle ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Military License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": 1,\n  \"chassisNumber\": \"1234567890ABCDEFG\",\n  \"licenseNumber\": \"MIL123456\",\n  \"issueDate\": \"2024-01-01\",\n  \"expiryDate\": \"2025-01-01\",\n  \"militaryUnit\": \"Unit 101\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/createMilitaryLicense",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", "createMilitaryLicense"]
+            },
+            "description": "Create a new military license"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Military License",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expiryDate\": \"2026-01-01\",\n  \"militaryUnit\": \"Unit 102\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Military License ID"
+                }
+              ]
+            },
+            "description": "Update a military license"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Military License",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/military-licenses/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["military-licenses", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "Military License ID"
+                }
+              ]
+            },
+            "description": "Delete a military license"
+          },
+          "response": []
+        }
+      ],
+      "description": "Military license management endpoints"
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Root Endpoint",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Root endpoint - serves the frontend application"
+          },
+          "response": []
+        }
+      ],
+      "description": "Basic health check endpoints"
+    }
+  ]
+}

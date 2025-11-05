@@ -97,6 +97,9 @@ class Vehicle extends Model {
         license_status: {
           type: DataTypes.STRING,
         },
+        date_added_to_inventory: {
+          type: DataTypes.DATE,
+        },
         notes: {
           type: DataTypes.JSON,
           allowNull: true,
