@@ -168,9 +168,28 @@ exports.getExpiredLicenses = catchAsync(async (req, res) => {
     },
   });
 });
+
+// Helper function to parse Egyptian date format (DD-MM-YYYY)
+function parseUserDate(input) {
+  const [day, month, year] = input.split("-");
+  return new Date(`${year}-${month}-${day}`);
+}
+
 // Update license
 exports.updateLicense = catchAsync(async (req, res) => {
-  const [updated] = await License.update(req.body, {
+  const licenseData = { ...req.body };
+
+  // Parse dates if provided (exactly like vehicles)
+  if (licenseData.license_start_date) {
+    licenseData.license_start_date = parseUserDate(
+      licenseData.license_start_date
+    );
+  }
+  if (licenseData.license_end_date) {
+    licenseData.license_end_date = parseUserDate(licenseData.license_end_date);
+  }
+
+  const [updated] = await License.update(licenseData, {
     where: { id: req.params.id },
   });
   if (!updated) {
