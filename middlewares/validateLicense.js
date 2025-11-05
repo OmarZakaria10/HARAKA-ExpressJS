@@ -38,18 +38,11 @@ exports.validateLicenseData = catchAsync(async (req, res, next) => {
       return next(new AppError("End date cannot be before start date", 400));
     }
 
-    // Convert DD-MM-YYYY to YYYY-MM-DD format for the model setter
-    const formatDateForModel = (dateStr) => {
-      const [day, month, year] = dateStr.split("-");
-      return `${year}-${month}-${day}`;
-    };
-
-    licenseData.license_start_date = formatDateForModel(
+    // Convert DD-MM-YYYY to Date object for the model setter (exactly like vehicles)
+    licenseData.license_start_date = parseUserDate(
       licenseData.license_start_date
     );
-    licenseData.license_end_date = formatDateForModel(
-      licenseData.license_end_date
-    );
+    licenseData.license_end_date = parseUserDate(licenseData.license_end_date);
   }
 
   // 3. If vehicleId is provided, validate vehicle exists
