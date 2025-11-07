@@ -38,9 +38,11 @@ class License extends Model {
           allowNull: true,
           get() {
             if (!this.getDataValue("license_start_date")) return null;
-            return new Date(this.getDataValue("license_start_date"))
-              .toISOString()
-              .split("T")[0];
+            const date = new Date(this.getDataValue("license_start_date"));
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
           },
           set(value) {
             if (!value) return this.setDataValue("license_start_date", null);
@@ -53,9 +55,11 @@ class License extends Model {
           allowNull: true,
           get() {
             if (!this.getDataValue("license_end_date")) return null;
-            return new Date(this.getDataValue("license_end_date"))
-              .toISOString()
-              .split("T")[0];
+            const date = new Date(this.getDataValue("license_end_date"));
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
           },
           set(value) {
             if (!value) return this.setDataValue("license_end_date", null);

@@ -102,9 +102,11 @@ class Vehicle extends Model {
           allowNull: true,
           get() {
             if (!this.getDataValue("date_added_to_inventory")) return null;
-            return new Date(this.getDataValue("date_added_to_inventory"))
-              .toISOString()
-              .split("T")[0];
+            const date = new Date(this.getDataValue("date_added_to_inventory"));
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
           },
           set(value) {
             if (!value)
