@@ -30,14 +30,20 @@ router.post(
 
 //Update License
 router.patch("/updateLicense/:id", licenseController.updateLicense);
-// Delete License
-// Delete a license by ID
-router.delete("/deleteLicense/:id", licenseController.deleteLicense);
 
 // Get all licenses with associated vehicles
 router.get(
   "/getAllLicensesWithVehicles",
   licenseController.getAllLicensesWithVehicles
 );
+
+
+router.use(authController.restrictTo("admin", "license")); // Restrict all routes
+
+// Delete License
+// Delete a license by ID
+router.delete("/deleteLicense/:id", licenseController.deleteLicense);
+
+
 
 module.exports = router;

@@ -28,7 +28,9 @@ router.get("/getFilteredVehicles", vehicleController.getFilteredVehicles);
 
 router.use(authController.restrictTo("admin", "user"));
 router.post("/createVehicle", vehicleController.createVehicle);
-router.delete("/deleteVehicle/:id", vehicleController.deleteVehicle);
 router.put("/updateInsuranceStatus", vehicleController.updateInsuranceStatus);
+
+router.use(authController.restrictTo("admin"));
+router.delete("/deleteVehicle/:id", vehicleController.deleteVehicle);
 
 module.exports = router;
