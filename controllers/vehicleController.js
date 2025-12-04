@@ -13,7 +13,6 @@ const getRoleAttributes = (userRole) => {
 };
 
 exports.getAllVehicles = catchAsync(async (req, res) => {
-  // console.log(req.user.role);
   const vehicles = await Vehicle.findAll({
     attributes: getRoleAttributes(req.user.role),
     order: [["createdAt", "ASC"]],

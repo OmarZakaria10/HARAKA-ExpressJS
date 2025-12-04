@@ -3,6 +3,8 @@ const { promisify } = require("util");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -50,6 +52,7 @@ exports.changeUserPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
+  console.log("try loggggggggggggggging")
   const { username, password } = req.body;
   // 1) Check if username and password exist
   if (!username || !password) {

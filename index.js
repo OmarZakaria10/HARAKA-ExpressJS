@@ -1,5 +1,6 @@
 // File: index.js
 const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
 const db = require("./config/database");
 const { setupAssociations, Vehicle, License } = require("./models/models");
 

@@ -2,6 +2,7 @@
 const { Sequelize } = require("sequelize");
 const dotenv = require("dotenv");
 let chalk = null;
+dotenv.config({ path: "./config.env" });
 if (process.env.NODE_ENV === "development") {
   chalk = require("chalk");
 }

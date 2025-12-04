@@ -1,6 +1,7 @@
 // Health check script for Docker
 const http = require("http");
-
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
 const options = {
   host: "localhost",
   port: process.env.PORT || 4000,

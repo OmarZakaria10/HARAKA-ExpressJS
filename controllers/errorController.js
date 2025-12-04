@@ -1,3 +1,5 @@
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
 const AppError = require("../utils/appError");
 const {
   ValidationError,

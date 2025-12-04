@@ -10,7 +10,8 @@ const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
 const app = express();
 
 // 🔒 SECURITY MIDDLEWARE (Must be first!)
@@ -59,6 +60,7 @@ app.use("/military-licenses", militaryLicenseRoutes);
 app.get("/", (req, res) => {
   res.sendFile(`${__dirname}/build/index.html`);
 });
+
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
