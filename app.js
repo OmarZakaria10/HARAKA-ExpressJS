@@ -37,7 +37,7 @@ if (process.env.NODE_ENV === "development") {
 // 4. CORS - Simple configuration for two origins
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://haraka-asnt.onrender.com"],
+    origin: ["http://localhost:3000", "https://haraka-asnt.onrender.com", "https://haraka-x2fx.onrender.com"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
