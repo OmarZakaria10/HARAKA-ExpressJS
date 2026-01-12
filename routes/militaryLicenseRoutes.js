@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(authController.protect);
 
 // All roles allowed to read and create
-router.use(authController.restrictTo("admin", "user", "viewer"));
+router.use(authController.restrictTo("admin", "user", "viewer", "license"));
 
 // Public for the allowed roles (admin, user, viewer)
 router.get("/getAllMilitaryLicenses", militaryLicenseController.getAllMilitaryLicenses);
@@ -20,7 +20,7 @@ router.get("/:id", militaryLicenseController.getMilitaryLicenseById);
 // Update → only admin + user
 router.patch(
   "/:id",
-  authController.restrictTo("admin", "user"),
+  authController.restrictTo("admin", "user", "license"),
   militaryLicenseController.updateMilitaryLicense
 );
 
