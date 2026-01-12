@@ -7,7 +7,7 @@ router.use(authController.protect); // Protect all routes after this middleware
 router.get("/getAllVehicles", vehicleController.getAllVehicles);
 router.get("/getUniqueFieldValues", vehicleController.getUniqueFieldValues);
 router.get("/getVehicle/:id", vehicleController.getVehicleById);
-router.use(authController.restrictTo("admin", "user", "GPS", "viewer")); // Restrict all routes to admin, user, vehicle, and viewer roles
+router.use(authController.restrictTo("admin", "user", "GPS", "viewer", "license")); // Restrict all routes to admin, user, vehicle, and viewer roles
 
 router.get(
   "/getVehiclesBySector/:sector",
@@ -22,7 +22,7 @@ router.get(
   vehicleController.getVehiclesByAdministration
 );
 
-router.use(authController.restrictTo("admin", "user", "GPS"));
+router.use(authController.restrictTo("admin", "user", "GPS", "license"));
 router.patch("/updateVehicle/:id", vehicleController.updateVehicle);
 router.get("/getFilteredVehicles", vehicleController.getFilteredVehicles);
 
