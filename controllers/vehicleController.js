@@ -13,13 +13,24 @@ const getRoleAttributes = (userRole) => {
 };
 
 exports.getAllVehicles = catchAsync(async (req, res) => {
-  const vehicles = await Vehicle.findAll({
+  // Get limit from query parameter or use default of 3000
+  const limit = parseInt(req.query.limit, 10) || 3000;
+  const page = parseInt(req.query.page, 10) || 1;
+  const offset = (page - 1) * limit;
+  
+  const { count, rows: vehicles } = await Vehicle.findAndCountAll({
     attributes: getRoleAttributes(req.user.role),
     order: [["createdAt", "ASC"]],
+    limit: limit,
+    offset: offset,
   });
+  
   res.status(200).json({
     status: "success",
     results: vehicles.length,
+    total: count,
+    page: page,
+    totalPages: Math.ceil(count / limit),
     data: {
       vehicles,
     },

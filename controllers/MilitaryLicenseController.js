@@ -5,13 +5,23 @@ const catchAsync = require("../utils/catchAsync");
 const sequelize = database.getSequelize();
 
 exports.getAllMilitaryLicenses = catchAsync(async (req, res) => {
-  const militaryLicenses = await MilitaryLicense.findAll({
+  // Get limit from query parameter or use default of 3000
+  const limit = parseInt(req.query.limit, 10) || 3000;
+  const page = parseInt(req.query.page, 10) || 1;
+  const offset = (page - 1) * limit;
+  
+  const { count, rows: militaryLicenses } = await MilitaryLicense.findAndCountAll({
     order: [["createdAt", "ASC"]],
+    limit: limit,
+    offset: offset,
   });
 
   res.status(200).json({
     status: "success",
     results: militaryLicenses.length,
+    total: count,
+    page: page,
+    totalPages: Math.ceil(count / limit),
     data: {
       militaryLicenses,
     },

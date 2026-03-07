@@ -44,7 +44,7 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json({ limit: "50mb" }));
 // Serving static files
 app.use(express.static(`${__dirname}/build`));
 app.use(cookieParser());

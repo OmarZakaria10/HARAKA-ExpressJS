@@ -34,14 +34,26 @@ exports.createLicense = catchAsync(async (req, res) => {
 });
 
 exports.getAllLicenses = catchAsync(async (req, res) => {
-  const licenses = await License.findAll({
+  // Get limit from query parameter or use default of 3000
+  const limit = parseInt(req.query.limit, 10) || 3000;
+  const page = parseInt(req.query.page, 10) || 1;
+  const offset = (page - 1) * limit;
+  
+  const { count, rows: licenses } = await License.findAndCountAll({
     order: [["createdAt", "ASC"]],
     attributes: {
       include: ["validity_status"],
     },
+    limit: limit,
+    offset: offset,
   });
+  
   res.status(200).json({
     status: "success",
+    results: licenses.length,
+    total: count,
+    page: page,
+    totalPages: Math.ceil(count / limit),
     data: {
       licenses,
     },
@@ -49,7 +61,12 @@ exports.getAllLicenses = catchAsync(async (req, res) => {
 });
 
 exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
-  const licenses = await License.findAll({
+  // Get limit from query parameter or use default of 3000
+  const limit = parseInt(req.query.limit, 10) || 3000;
+  const page = parseInt(req.query.page, 10) || 1;
+  const offset = (page - 1) * limit;
+  
+  const { count, rows: licenses } = await License.findAndCountAll({
     attributes: ["plate_number"],
     include: [
       {
@@ -72,6 +89,8 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
     ],
     order: [[{ model: Vehicle, as: "vehicle" }, "createdAt", "ASC"]],
     raw: false,
+    limit: limit,
+    offset: offset,
   });
 
   // Transform the data to match the SQL query structure
@@ -92,6 +111,9 @@ exports.getAllLicensesWithVehicles = catchAsync(async (req, res) => {
   res.status(200).json({
     status: "success",
     results: results.length,
+    total: count,
+    page: page,
+    totalPages: Math.ceil(count / limit),
     data: {
       licenses: results,
     },
