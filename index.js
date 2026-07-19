@@ -16,10 +16,15 @@ const app = require("./app");
 
 const psql = db.getSequelize();
 
-psql.sync().then(() => {
-  console.log("Database & tables created!");
-  setupAssociations();
-});
+setupAssociations();
+
+psql.sync({ alter: true })
+  .then(() => {
+    console.log("Database & tables synced!");
+  })
+  .catch((err) => {
+    console.error("Sync error:", err);
+  });
 
 const port = process.env.PORT || 4000;
 const server = app.listen(port, () => {
