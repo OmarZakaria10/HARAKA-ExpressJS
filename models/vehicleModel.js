@@ -119,6 +119,11 @@ class Vehicle extends Model {
           allowNull: true,
           defaultValue: {},
         },
+        cpmpany_name: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          defaultValue: {},
+        },
       },
       {
         sequelize,
