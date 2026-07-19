@@ -119,10 +119,10 @@ class Vehicle extends Model {
           allowNull: true,
           defaultValue: {},
         },
-        cpmpany_name: {
+        company_name: {
           type: DataTypes.STRING,
           allowNull: true,
-          defaultValue: {},
+          defaultValue: null,
         },
       },
       {
