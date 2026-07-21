@@ -122,7 +122,7 @@ class Vehicle extends Model {
         company_name: {
           type: DataTypes.STRING,
           allowNull: true,
-          defaultValue: null,
+          defaultValue: "تويوتا",
         },
       },
       {
